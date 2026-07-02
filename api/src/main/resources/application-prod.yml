@@ -16,6 +16,10 @@ spring:
   jpa:
     show-sql: false
 
+logging:
+  level:
+    tech.nocountry.talent.appbitservice: INFO
+
 app:
   jwt:
     secret: ${JWT_SECRET}
