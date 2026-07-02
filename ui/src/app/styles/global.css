@@ -1,0 +1,60 @@
+/* ------------------------------------------------------------------ */
+/* Global styles — App BiT frontend                                   */
+/* ------------------------------------------------------------------ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* ── Reset ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design tokens ─────────────────────────────────────────────────── */
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --color-primary: #111111;
+  --color-secondary: #6B7280;
+  --color-surface: #F9FAFB;
+  --color-border: #E5E7EB;
+  --color-accent: #1D4ED8;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-primary);
+  background: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ── Text overflow guards ─────────────────────────────────────────── */
+p, h1, h2, h3, h4, h5, h6, li, td, th, span, label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ── Prevent flex blowout ─────────────────────────────────────────── */
+.flexMinWidth {
+  min-width: 0;
+}

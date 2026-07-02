@@ -1,0 +1,59 @@
+services:
+  java-app:
+    container_name: app_bit_api
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxMetaspaceSize=384m
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 450M
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:18-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: app_bit_docker_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=64MB"
+      - "-c"
+      - "max_connections=30"
+      - "-c"
+      - "work_mem=4MB"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d vineyard_docker_db || exit 1" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 150M
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    name: app_bit_db_data

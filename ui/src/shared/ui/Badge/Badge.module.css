@@ -1,0 +1,36 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.variantSuccess {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.variantWarning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.variantError {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.variantInfo {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.variantNeutral {
+  background-color: #f3f4f6;
+  color: #374151;
+}

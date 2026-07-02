@@ -1,0 +1,67 @@
+.wrapper {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.wrapper::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 2px;
+}
+
+/* ── Pill base ─────────────────────────────────────────────────────── */
+
+.pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid;
+  border-radius: 9999px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.pill:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ── Active ─────────────────────────────────────────────────────────── */
+
+.active {
+  background-color: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.active:hover {
+  background-color: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+/* ── Inactive ───────────────────────────────────────────────────────── */
+
+.inactive {
+  background-color: #f9fafb;
+  color: #111111;
+  border-color: transparent;
+}
+
+.inactive:hover {
+  background-color: #e5e7eb;
+}
+
+

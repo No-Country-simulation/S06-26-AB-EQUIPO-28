@@ -1,0 +1,167 @@
+/* ------------------------------------------------------------------ */
+/* FilterBar — region select, period chips, vulnerable toggle          */
+/*                                                                    */
+/* Full-width horizontal bar styling (no rounded container).           */
+/* ------------------------------------------------------------------ */
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+}
+
+.filterRow {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Period chips ────────────────────────────────────────────────── */
+
+.periodChips {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.chip:hover {
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.chipActive {
+  background-color: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.chipActive:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* ── Vulnerable-only toggle ──────────────────────────────────────── */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toggleTrack {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e5e7eb;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.toggleInput:checked + .toggleTrack {
+  background-color: #1d4ed8;
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+
+.toggleInput:checked + .toggleTrack .toggleThumb {
+  transform: translateX(16px);
+}
+
+.toggleLabel {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .filterBar {
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    gap: 10px;
+  }
+
+  .filterRow {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .periodChips {
+    justify-content: stretch;
+  }
+
+  .chip {
+    flex: 1;
+  }
+
+  .toggleRow {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

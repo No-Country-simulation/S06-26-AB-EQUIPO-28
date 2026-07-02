@@ -1,0 +1,45 @@
+.card {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #1d4ed8;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.body {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  color: #111111;
+  line-height: 1.6;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}

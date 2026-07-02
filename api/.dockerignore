@@ -1,0 +1,41 @@
+# 1. Ignorar todo lo relacionado con Git
+.git
+.gitignore
+
+# 2. Ignorar builds y temporales locales
+target/
+build/
+.mvn/wrapper/maven-wrapper.jar
+
+# 3. Ignorar archivos de IDEs (Tu lista exacta)
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.idea
+*.iws
+*.iml
+*.ipr
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+.vscode/
+
+# 4. Ignorar Logs y Documentación
+skills/
+logs/
+nul
+.opencode
+AGENTS.md
+documentation/
+openspec
+
+# 5. Ignorar Secretos y Archivos Docker
+/src/main/resources/env.properties
+.env
+docker-compose.yml

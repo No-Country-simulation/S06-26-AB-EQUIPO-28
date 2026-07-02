@@ -1,0 +1,21 @@
+// ---------------------------------------------------------------------------
+// AI Agent entity — immutable domain types for conversational analysis.
+// ---------------------------------------------------------------------------
+
+export interface AiQuery {
+  readonly question: string;
+  readonly indicator?: string;
+  readonly region?: string;
+}
+
+export interface AiDataItem {
+  readonly region: string;
+  readonly value: number;
+  readonly source: string;
+}
+
+export interface AiResponse {
+  readonly summary: string;
+  readonly data: readonly AiDataItem[];
+  readonly sources: readonly string[];
+}

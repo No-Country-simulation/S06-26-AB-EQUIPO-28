@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <property name="CONSOLE_LOG_PATTERN_DEV" value="%clr(%d{HH:mm:ss}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%X{correlationId}]){yellow} %clr(%-25logger{0}){cyan} : %m%n%xException{5, org.springframework, org.apache, java.base, jdk.internal}"/>
+    <property name="CONSOLE_LOG_PATTERN_PROD" value="%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} [%15.15t] [%X{correlationId}] %-30.30logger{29} : %m%n%xException{full, org.springframework, org.apache.catalina, org.apache.tomcat, org.apache.coyote, jakarta.servlet, java.base, jdk.internal}"/>
+    <springProfile name="dev">
+        <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN_DEV}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_DEV" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <appender name="CONSOLE_PROD" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN_PROD}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PROD" />
+        </root>
+    </springProfile>
+
+    <logger name="org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer" level="ERROR"/>
+    <logger name="org.hibernate.orm.connections.pooling" level="WARN"/>
+    <logger name="org.hibernate.orm.core" level="WARN"/>
+    <logger name="org.hibernate.orm.jpa" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+</configuration>

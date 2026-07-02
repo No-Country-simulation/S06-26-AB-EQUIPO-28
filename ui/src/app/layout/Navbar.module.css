@@ -1,0 +1,156 @@
+/* ------------------------------------------------------------------ */
+/* Navbar — fixed-top navigation bar                                  */
+/* ------------------------------------------------------------------ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  z-index: 100;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 80px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Brand ────────────────────────────────────────────────────────── */
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111111;
+  text-decoration: none;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+
+/* ── Desktop nav links ────────────────────────────────────────────── */
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  height: 72px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6B7280;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  color: #111111;
+}
+
+.active {
+  color: #111111;
+  border-bottom-color: #1D4ED8;
+}
+
+/* ── Hamburger toggle — hidden checkbox + CSS-only icon ───────────── */
+.hamburgerLabel {
+  display: none;
+  cursor: pointer;
+  padding: 8px;
+  user-select: none;
+}
+
+.hamburgerInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hamburgerIcon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 24px;
+}
+
+.bar {
+  display: block;
+  height: 2px;
+  background: #111111;
+  border-radius: 1px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+/* ── Open state for the hamburger icon (X shape) ─────────────────── */
+.hamburgerInput:checked ~ .hamburgerIcon .bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburgerInput:checked ~ .hamburgerIcon .bar:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburgerInput:checked ~ .hamburgerIcon .bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile: show hamburger, hide links by default ────────────────── */
+@media (max-width: 767px) {
+  .inner {
+    padding: 0 32px;
+  }
+
+  .hamburgerLabel {
+    display: block;
+  }
+
+  .navLinks {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 8px 0;
+    gap: 0;
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .navLinksOpen {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .navLink {
+    height: auto;
+    padding: 12px 24px;
+    border-bottom: none;
+    width: 100%;
+  }
+
+  .navLink:hover {
+    background: #F9FAFB;
+  }
+
+  .active {
+    border-bottom: none;
+    background: #EFF6FF;
+    color: #1D4ED8;
+  }
+}
