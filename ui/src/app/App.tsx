@@ -5,8 +5,8 @@
 // This is the single entry point consumed by main.tsx.
 // ---------------------------------------------------------------------------
 
-import { AppProviders } from "./providers";
-import { AppRouter } from "./router";
+import { AppProviders } from "./providers/AppProviders";
+import { AppRouter } from "./router/AppRouter";
 
 export function App() {
   return (

@@ -6,7 +6,4 @@
 // data sources.
 // ---------------------------------------------------------------------------
 
-export { AiQueryDashboard } from "./ui/AiQueryDashboard.tsx";
 export { useAskAi } from "./model/useAskAi.ts";
-export { AiSearchInput } from "./ui/AiSearchInput.tsx";
-export { AiResponseDisplay } from "./ui/AiResponseDisplay.tsx";

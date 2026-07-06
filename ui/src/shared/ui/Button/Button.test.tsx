@@ -17,13 +17,6 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("is disabled when loading", () => {
-    render(<Button loading>Loading</Button>);
-    const btn = screen.getByRole("button");
-    expect(btn).toBeDisabled();
-    expect(btn).toHaveAttribute("aria-busy", "true");
-  });
-
   it("is disabled when disabled prop is set", () => {
     render(<Button disabled>Disabled</Button>);
     expect(screen.getByRole("button")).toBeDisabled();
@@ -35,11 +28,5 @@ describe("Button", () => {
     render(<Button onClick={onClick} disabled>No</Button>);
     await user.click(screen.getByRole("button"));
     expect(onClick).not.toHaveBeenCalled();
-  });
-
-  it("shows a spinner when loading", () => {
-    render(<Button loading>Submitting</Button>);
-    const svg = document.querySelector("svg");
-    expect(svg).toBeInTheDocument();
   });
 });

@@ -1,13 +1,14 @@
 // ---------------------------------------------------------------------------
-// Translations — Spanish (default) + Portuguese (alternative)
+// Translations — Spanish (default), Portuguese and English
 //
-// Keys use dot notation for namespacing. Spanish is the default/fallback
-// language. Portuguese is the secondary alternative.
+// Keys use dot notation for namespacing. Spanish is the default/fallback.
+// Use {param} placeholders for dynamic values in t().
 // ---------------------------------------------------------------------------
 
 export const LOCALES = {
   es: "Español",
   pt: "Português",
+  en: "English",
 } as const;
 
 export type Locale = keyof typeof LOCALES;
@@ -20,13 +21,14 @@ export type TranslationKey = keyof typeof translations.es;
 
 export const translations: Record<Locale, Record<string, string>> = {
   es: {
-    // ── Navbar ──────────────────────────────────────────────────────
+    //  Navbar 
     "nav.map": "Mapa Interactivo",
     "nav.methodology": "Metodología",
+    "nav.panel": "Panel",
     "nav.brand": "App BiT",
     "nav.menuLabel": "Abrir menú de navegación",
 
-    // ── Dashboard ───────────────────────────────────────────────────
+    //  Dashboard ─
     "dashboard.title": "Consultas de IA",
     "dashboard.subtitle": "Haz preguntas en lenguaje natural sobre los datos",
     "dashboard.summary": "Resumen",
@@ -44,13 +46,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.loading": "Procesando consulta…",
     "dashboard.error": "Error al procesar la consulta",
     "dashboard.retry": "Intentar de nuevo",
+    "dashboard.viewResponse": "Ver respuesta",
     "dashboard.keyFindings": "Principales Hallazgos",
     "dashboard.recommendedActions": "Acciones Recomendadas",
     "dashboard.sources": "Fuentes",
     "dashboard.warnings": "Advertencias",
     "dashboard.indicators.all": "Todos",
 
-    // ── Map ─────────────────────────────────────────────────────────
+    //  Map ─
     "map.title": "Mapa Interactivo — Visualización Geoespacial",
     "map.placeholder": "Mapa se cargará al instalar maplibre-gl",
     "map.loading": "Cargando mapa…",
@@ -74,7 +77,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "map.legend.high": "Alta",
     "map.region": "Región",
 
-    // ── Methodology ─────────────────────────────────────────────────
+    //  Methodology ─
     "methodology.title": "Metodología y Fuentes",
     "methodology.subtitle": "Transparencia sobre datos, métodos y privacidad",
     "methodology.dataSources": "Fuentes de Datos",
@@ -93,7 +96,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "methodology.securityDesc":
       "El acceso a la API está protegido por autenticación JWT con tokens de acceso y refresh. Los endpoints de IA tienen rate limiting de 10 solicitudes por minuto por IP para evitar abusos.",
 
-    // ── Common ──────────────────────────────────────────────────────
+    //  Common 
     "common.loading": "Cargando…",
     "common.error": "Error",
     "common.retry": "Intentar de nuevo",
@@ -103,32 +106,32 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noData": "Sin datos disponibles",
     "common.search": "Buscar",
 
-    // ── Indicators ──────────────────────────────────────────────────
+    //  Indicators 
     "indicator.employabilityGap": "Brecha de Empleabilidad",
     "indicator.trainingCoverage": "Cobertura de Formación",
     "indicator.mentalHealthAccess": "Acceso a Salud Mental",
     "indicator.mentorshipPrograms": "Programas de Mentoría",
     "indicator.structuredExperiences": "Experiencias Estructurantes",
 
-    // ── Severity ────────────────────────────────────────────────────
+    //  Severity 
     "severity.high": "Alto",
     "severity.medium": "Medio",
     "severity.low": "Bajo",
     "severity.critical": "Crítico",
 
-    // ── Trends ──────────────────────────────────────────────────────
+    //  Trends 
     "trend.improving": "Mejorando",
     "trend.stable": "Estable",
     "trend.declining": "Deteriorando",
 
-    // ── Badge ───────────────────────────────────────────────────────
+    //  Badge
     "badge.success": "Éxito",
     "badge.warning": "Advertencia",
     "badge.error": "Error",
     "badge.info": "Información",
     "badge.neutral": "Neutral",
 
-    // ── Mental Health ──────────────────────────────────────────────
+    //  Mental Health 
     "mentalHealth.title": "Salud Mental Comunitaria",
     "mentalHealth.indicators": "Indicadores",
     "mentalHealth.score": "Puntuación",
@@ -141,16 +144,102 @@ export const translations: Record<Locale, Record<string, string>> = {
     "mentalHealth.priorityRegions": "Regiones prioritarias",
     "map.showAntennas": "Mostrar antenas",
     "map.highConcentrationOnly": "Solo alta concentración",
+
+    //  Alerts
+    "alert.thresholdsTitle": "Umbrales de Alerta",
+    "alert.historyTitle": "Historial de Alertas",
+    "alert.noHistory": "No hay alertas registradas",
+    "alert.resetDefaults": "Restaurar valores por defecto",
+    "alert.clearHistory": "Limpiar historial",
+    "alert.acknowledge": "Ok",
+    "alert.configure": "Configurar alertas",
+    "alert.history": "Historial",
+    "alert.noAlerts": "Sin alertas",
+    "alert.bellLabel": "Alertas activas",
+
+    //  Export
+    "export.label": "Exportar reporte PDF",
+
+    //  Panel
+    "panel.title": "Panel BiT",
+    "panel.subtitle": "Datos públicos para la inclusión digital",
+    "panel.map": "Mapa",
+    "panel.query": "Consulta IA",
+    "panel.comparative": "Comparativo",
+    "panel.visualization": "Visualización",
+    "panel.indicatorToView": "Indicador a visualizar",
+    "panel.region": "Región",
+    "panel.language": "Idioma",
+    "panel.view.vulnerability": "Vulnerabilidad",
+    "panel.view.connectivity": "Conectividad",
+    "panel.gap.high": "alta",
+    "panel.gap.medium": "media",
+    "panel.gap.low": "baja",
+    "panel.connectivity.high": "Alta",
+    "panel.connectivity.medium": "Media",
+    "panel.connectivity.low": "Baja",
+    "panel.legend.lowConnectivity": "Bajo / buena conectividad",
+    "panel.legend.medium": "Medio",
+    "panel.legend.highGap": "Crítico / brecha alta",
+    "panel.legend.circleSize": "Tamaño del círculo = población",
+    "panel.vulnerableRegions.title": "Regiones por vulnerabilidad",
+    "panel.vulnerableRegions.description": "Puntajes de vulnerabilidad y conectividad por región.",
+    "panel.comparative.title": "Comparativo de indicadores (promedio por región)",
+    "panel.comparative.description": "Comparativa de indicadores de vulnerabilidad entre regiones.",
+    "panel.report.badge": "Reporte {period} · {date}",
+    "panel.footer": "Panel BiT · Datos del reporte {period} · {population} personas",
+    "panel.loadReportError": "Error al cargar reporte",
+    "panel.kpi.totalPopulation": "Población total",
+    "panel.kpi.vulnerabilityScore": "Puntaje de vulnerabilidad",
+    "panel.kpi.vulnerablePopulation": "Población vulnerable",
+    "panel.kpi.priorityRegions": "Regiones prioritarias",
+    "panel.metric.vulnerabilityScore": "Puntaje vulnerabilidad",
+    "panel.metric.vulnerablePct": "% vulnerable",
+    "panel.metric.connectivity": "Conectividad",
+    "panel.metric.priority": "Prioritaria",
+    "panel.metric.yes": "Sí",
+    "panel.metric.no": "No",
+    "panel.aiAnalysis.title": "Análisis de datos",
+    "panel.aiAnalysis.metric": "Región: {region}",
+    "panel.aiAnalysis.metricAllRegions": "Región: todas",
+    "panel.peopleSuffix": "pers.",
+    "panel.queryPlaceholder": "Escribe tu pregunta...",
+    "panel.queryTitle": "Consulta en lenguaje natural",
+    "panel.querySubtitle": "Pregunta sobre brechas, cobertura o servicios por región",
+    "panel.querySubmit": "Enviar consulta",
+    "panel.queryAgentResponse": "Respuesta del agente",
+    "panel.queryYouAsked": "Tu consulta",
+    "panel.queryClear": "Nueva consulta",
+    "panel.queryTable.region": "Región",
+    "panel.queryTable.value": "Valor",
+    "panel.queryTable.source": "Fuente",
+    "panel.querySources": "Fuentes:",
+    "panel.suggestion.concentration": "¿Dónde hay concentración de personas pero cobertura de red precaria?",
+    "panel.suggestion.digitalGap": "¿Cuáles son las zonas con mayor brecha de inclusión digital?",
+    "panel.suggestion.training": "¿Qué regiones tienen menor cobertura de formación?",
+    "panel.suggestion.antennas": "¿Dónde deberían instalarse nuevas antenas?",
+    "panel.zones.title": "Zonas prioritarias",
+    "panel.zones.description": "Alta concentración de personas + cobertura de red precaria.",
+    "panel.detail.empty": "Selecciona una zona para ver el detalle",
+    "panel.detail.people": "personas",
+    "panel.detail.coverage": "cobertura",
+    "panel.detail.antennas": "antenas",
+    "panel.detail.gap": "Brecha {level}",
+    "panel.detail.networkMix": "Mix de red",
+    "panel.detail.indicators": "Indicadores",
+    "panel.data.real": "Datos reales",
+    "panel.data.emulated": "Datos emulados",
   },
 
   pt: {
-    // ── Navbar ──────────────────────────────────────────────────────
+    //  Navbar 
     "nav.map": "Mapa Interativo",
     "nav.methodology": "Metodologia",
+    "nav.panel": "Painel",
     "nav.brand": "App BiT",
     "nav.menuLabel": "Abrir menu de navegação",
 
-    // ── Dashboard ───────────────────────────────────────────────────
+    //  Dashboard ─
     "dashboard.title": "Consultas de IA",
     "dashboard.subtitle": "Faça perguntas em linguagem natural sobre os dados",
     "dashboard.summary": "Resumo",
@@ -168,13 +257,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.loading": "Processando consulta…",
     "dashboard.error": "Erro ao processar a consulta",
     "dashboard.retry": "Tentar novamente",
+    "dashboard.viewResponse": "Ver resposta",
     "dashboard.keyFindings": "Principais Descobertas",
     "dashboard.recommendedActions": "Ações Recomendadas",
     "dashboard.sources": "Fontes",
     "dashboard.warnings": "Avisos",
     "dashboard.indicators.all": "Todos",
 
-    // ── Map ─────────────────────────────────────────────────────────
+    //  Map ─
     "map.title": "Mapa Interativo — Visualização Geoespacial",
     "map.placeholder": "Mapa será carregado ao instalar maplibre-gl",
     "map.loading": "Carregando mapa…",
@@ -198,7 +288,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "map.legend.high": "Alta",
     "map.region": "Região",
 
-    // ── Methodology ─────────────────────────────────────────────────
+    //  Methodology ─
     "methodology.title": "Metodologia e Fontes",
     "methodology.subtitle": "Transparência sobre dados, métodos e privacidade",
     "methodology.dataSources": "Fontes de Dados",
@@ -217,7 +307,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "methodology.securityDesc":
       "O acesso à API é protegido por autenticação JWT com tokens de acesso e refresh. Endpoints de IA possuem rate limiting de 10 requisições por minuto por IP para evitar abuso.",
 
-    // ── Common ──────────────────────────────────────────────────────
+    //  Common 
     "common.loading": "Carregando…",
     "common.error": "Erro",
     "common.retry": "Tentar novamente",
@@ -227,32 +317,32 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noData": "Sem dados disponíveis",
     "common.search": "Buscar",
 
-    // ── Indicators ──────────────────────────────────────────────────
+    //  Indicators 
     "indicator.employabilityGap": "Brecha de Empregabilidade",
     "indicator.trainingCoverage": "Cobertura de Treinamento",
     "indicator.mentalHealthAccess": "Acesso à Saúde Mental",
     "indicator.mentorshipPrograms": "Programas de Mentoría",
     "indicator.structuredExperiences": "Experiências Estruturantes",
 
-    // ── Severity ────────────────────────────────────────────────────
+    //  Severity 
     "severity.high": "Alto",
     "severity.medium": "Médio",
     "severity.low": "Baixo",
     "severity.critical": "Crítico",
 
-    // ── Trends ──────────────────────────────────────────────────────
+    //  Trends 
     "trend.improving": "Melhorando",
     "trend.stable": "Estável",
     "trend.declining": "Piorando",
 
-    // ── Badge ───────────────────────────────────────────────────────
+    //  Badge
     "badge.success": "Sucesso",
     "badge.warning": "Aviso",
     "badge.error": "Erro",
     "badge.info": "Informação",
     "badge.neutral": "Neutro",
 
-    // ── Mental Health ──────────────────────────────────────────────
+    //  Mental Health 
     "mentalHealth.title": "Saúde Mental Comunitária",
     "mentalHealth.indicators": "Indicadores",
     "mentalHealth.score": "Pontuação",
@@ -265,5 +355,301 @@ export const translations: Record<Locale, Record<string, string>> = {
     "mentalHealth.priorityRegions": "Regiões prioritárias",
     "map.showAntennas": "Mostrar antenas",
     "map.highConcentrationOnly": "Só alta concentração",
+
+    //  Alerts
+    "alert.thresholdsTitle": "Limites de Alerta",
+    "alert.historyTitle": "Histórico de Alertas",
+    "alert.noHistory": "Nenhum alerta registrado",
+    "alert.resetDefaults": "Restaurar valores padrão",
+    "alert.clearHistory": "Limpar histórico",
+    "alert.acknowledge": "Ok",
+    "alert.configure": "Configurar alertas",
+    "alert.history": "Histórico",
+    "alert.noAlerts": "Sem alertas",
+    "alert.bellLabel": "Alertas ativas",
+
+    //  Export
+    "export.label": "Exportar relatório PDF",
+
+    //  Panel
+    "panel.title": "Painel BiT",
+    "panel.subtitle": "Dados públicos para a inclusão digital",
+    "panel.map": "Mapa",
+    "panel.query": "Consulta IA",
+    "panel.comparative": "Comparativo",
+    "panel.visualization": "Visualização",
+    "panel.indicatorToView": "Indicador a visualizar",
+    "panel.region": "Região",
+    "panel.language": "Idioma",
+    "panel.view.vulnerability": "Vulnerabilidade",
+    "panel.view.connectivity": "Conectividade",
+    "panel.gap.high": "alta",
+    "panel.gap.medium": "média",
+    "panel.gap.low": "baixa",
+    "panel.connectivity.high": "Alta",
+    "panel.connectivity.medium": "Média",
+    "panel.connectivity.low": "Baixa",
+    "panel.legend.lowConnectivity": "Baixo / boa conectividade",
+    "panel.legend.medium": "Médio",
+    "panel.legend.highGap": "Crítico / gap alto",
+    "panel.legend.circleSize": "Tamanho do círculo = população",
+    "panel.vulnerableRegions.title": "Regiões por vulnerabilidade",
+    "panel.vulnerableRegions.description": "Pontuações de vulnerabilidade e conectividade por região.",
+    "panel.comparative.title": "Comparativo de indicadores (média por região)",
+    "panel.comparative.description": "Comparativa de indicadores de vulnerabilidade entre regiões.",
+    "panel.report.badge": "Relatório {period} · {date}",
+    "panel.footer": "Painel BiT · Dados do relatório {period} · {population} pessoas",
+    "panel.loadReportError": "Erro ao carregar relatório",
+    "panel.kpi.totalPopulation": "População total",
+    "panel.kpi.vulnerabilityScore": "Pontuação de vulnerabilidade",
+    "panel.kpi.vulnerablePopulation": "População vulnerável",
+    "panel.kpi.priorityRegions": "Regiões prioritárias",
+    "panel.metric.vulnerabilityScore": "Pontuação vulnerabilidade",
+    "panel.metric.vulnerablePct": "% vulnerável",
+    "panel.metric.connectivity": "Conectividade",
+    "panel.metric.priority": "Prioritária",
+    "panel.metric.yes": "Sim",
+    "panel.metric.no": "Não",
+    "panel.aiAnalysis.title": "Análise de dados",
+    "panel.aiAnalysis.metric": "Região: {region}",
+    "panel.aiAnalysis.metricAllRegions": "Região: todas",
+    "panel.peopleSuffix": "pess.",
+    "panel.queryPlaceholder": "Escreva sua pergunta...",
+    "panel.queryTitle": "Consulta em linguagem natural",
+    "panel.querySubtitle": "Pergunte sobre gaps, cobertura ou serviços por região",
+    "panel.querySubmit": "Enviar consulta",
+    "panel.queryAgentResponse": "Resposta do agente",
+    "panel.queryYouAsked": "Sua consulta",
+    "panel.queryClear": "Nova consulta",
+    "panel.queryTable.region": "Região",
+    "panel.queryTable.value": "Valor",
+    "panel.queryTable.source": "Fonte",
+    "panel.querySources": "Fontes:",
+    "panel.suggestion.concentration": "Onde há concentração de pessoas mas cobertura de rede precária?",
+    "panel.suggestion.digitalGap": "Quais são as zonas com maior gap de inclusão digital?",
+    "panel.suggestion.training": "Quais regiões têm menor cobertura de formação?",
+    "panel.suggestion.antennas": "Onde deveriam ser instaladas novas antenas?",
+    "panel.zones.title": "Zonas prioritárias",
+    "panel.zones.description": "Alta concentração de pessoas + cobertura de rede precária.",
+    "panel.detail.empty": "Selecione uma zona para ver o detalhe",
+    "panel.detail.people": "pessoas",
+    "panel.detail.coverage": "cobertura",
+    "panel.detail.antennas": "antenas",
+    "panel.detail.gap": "Gap {level}",
+    "panel.detail.networkMix": "Mix de rede",
+    "panel.detail.indicators": "Indicadores",
+    "panel.data.real": "Dados reais",
+    "panel.data.emulated": "Dados emulados",
+  },
+
+  en: {
+    //  Navbar 
+    "nav.map": "Interactive Map",
+    "nav.methodology": "Methodology",
+    "nav.panel": "Panel",
+    "nav.brand": "App BiT",
+    "nav.menuLabel": "Open navigation menu",
+
+    //  Dashboard ─
+    "dashboard.title": "AI Queries",
+    "dashboard.subtitle": "Ask questions in natural language about the data",
+    "dashboard.summary": "Summary",
+    "dashboard.stats": "Quick Stats",
+    "dashboard.regions": "Regions",
+    "dashboard.statsPrioritarias": "Priority",
+    "dashboard.statsPopulation": "Population",
+    "dashboard.statsScore": "Score",
+    "dashboard.emptyBanner": "Select a region to view inclusion indicators.",
+    "dashboard.vulnerabilityScore": "Vulnerability Score",
+    "dashboard.allRegions": "All regions",
+    "dashboard.viewing": "Viewing",
+    "dashboard.newQuery": "New query",
+    "dashboard.searchPlaceholder": "E.g.: Which are the most vulnerable regions?",
+    "dashboard.loading": "Processing query…",
+    "dashboard.error": "Error processing query",
+    "dashboard.retry": "Try again",
+    "dashboard.viewResponse": "View response",
+    "dashboard.keyFindings": "Key Findings",
+    "dashboard.recommendedActions": "Recommended Actions",
+    "dashboard.sources": "Sources",
+    "dashboard.warnings": "Warnings",
+    "dashboard.indicators.all": "All",
+
+    //  Map ─
+    "map.title": "Interactive Map — Geospatial Visualization",
+    "map.placeholder": "Map will load after installing maplibre-gl",
+    "map.loading": "Loading map…",
+    "map.error": "Error loading map",
+    "map.period.dawn": "Dawn",
+    "map.period.morning": "Morning",
+    "map.period.afternoon": "Afternoon",
+    "map.period.night": "Night",
+    "map.vulnerableOnly": "Vulnerable only (≥66)",
+    "map.vulnerability": "Vulnerability",
+    "map.population": "Population",
+    "map.connectivity": "Connectivity",
+    "map.priority": "Priority",
+    "map.selectRegion": "Select a region to view details",
+    "map.nearbyRegions": "Nearby regions",
+    "map.legend.title": "Legend",
+    "map.legend.antenna": "Antenna",
+    "map.legend.highConcentration": "High concentration",
+    "map.legend.vulnerableRegion": "Vulnerable region",
+    "map.legend.low": "Low",
+    "map.legend.high": "High",
+    "map.region": "Region",
+
+    //  Methodology ─
+    "methodology.title": "Methodology & Sources",
+    "methodology.subtitle": "Transparency about data, methods and privacy",
+    "methodology.dataSources": "Data Sources",
+    "methodology.aiMethodology": "AI Methodology",
+    "methodology.privacy": "Privacy & Compliance",
+    "methodology.syntheticData": "Synthetic Data",
+    "methodology.syntheticDataDesc":
+      "All urban mobility data displayed on the platform is synthetic, artificially generated for prototyping and demonstration purposes. No real carrier data is used.",
+    "methodology.anonymization": "Anonymization",
+    "methodology.anonymizationDesc":
+      "Demographic data is aggregated by regional cluster and income range, without individual identification. Citizens are represented by anonymized hashes.",
+    "methodology.lgpd": "LGPD",
+    "methodology.lgpdDesc":
+      "The platform follows the principles of the General Data Protection Law (LGPD — Law No. 13.709/2018), including purpose, adequacy, necessity and transparency in data processing.",
+    "methodology.security": "Security",
+    "methodology.securityDesc":
+      "API access is protected by JWT authentication with access and refresh tokens. AI endpoints have rate limiting of 10 requests per minute per IP to prevent abuse.",
+
+    //  Common 
+    "common.loading": "Loading…",
+    "common.error": "Error",
+    "common.retry": "Try again",
+    "common.close": "Close",
+    "common.submit": "Submit",
+    "common.cancel": "Cancel",
+    "common.noData": "No data available",
+    "common.search": "Search",
+
+    //  Indicators 
+    "indicator.employabilityGap": "Employability Gap",
+    "indicator.trainingCoverage": "Training Coverage",
+    "indicator.mentalHealthAccess": "Mental Health Access",
+    "indicator.mentorshipPrograms": "Mentorship Programs",
+    "indicator.structuredExperiences": "Structuring Experiences",
+
+    //  Severity 
+    "severity.high": "High",
+    "severity.medium": "Medium",
+    "severity.low": "Low",
+    "severity.critical": "Critical",
+
+    //  Trends 
+    "trend.improving": "Improving",
+    "trend.stable": "Stable",
+    "trend.declining": "Declining",
+
+    //  Badge
+    "badge.success": "Success",
+    "badge.warning": "Warning",
+    "badge.error": "Error",
+    "badge.info": "Info",
+    "badge.neutral": "Neutral",
+
+    //  Mental Health 
+    "mentalHealth.title": "Community Mental Health",
+    "mentalHealth.indicators": "Indicators",
+    "mentalHealth.score": "Score",
+    "mentalHealth.scoreTooltip": "Mental health score based on infrastructure and access indicators",
+    "mentalHealth.scoreLow": "Low — Insufficient coverage",
+    "mentalHealth.scoreMedium": "Medium — Partial coverage",
+    "mentalHealth.scoreHigh": "High — Good coverage",
+    "mentalHealth.vulnerablePopulation": "Vulnerable population",
+    "mentalHealth.averageScore": "Average score",
+    "mentalHealth.priorityRegions": "Priority regions",
+    "map.showAntennas": "Show antennas",
+    "map.highConcentrationOnly": "High concentration only",
+
+    //  Alerts
+    "alert.thresholdsTitle": "Alert Thresholds",
+    "alert.historyTitle": "Alert History",
+    "alert.noHistory": "No alerts registered",
+    "alert.resetDefaults": "Restore defaults",
+    "alert.clearHistory": "Clear history",
+    "alert.acknowledge": "Ok",
+    "alert.configure": "Configure alerts",
+    "alert.history": "History",
+    "alert.noAlerts": "No alerts",
+    "alert.bellLabel": "Active alerts",
+
+    //  Export
+    "export.label": "Export PDF report",
+
+    //  Panel
+    "panel.title": "BiT Panel",
+    "panel.subtitle": "Public data for digital inclusion",
+    "panel.map": "Map",
+    "panel.query": "AI Query",
+    "panel.comparative": "Comparison",
+    "panel.visualization": "Visualization",
+    "panel.indicatorToView": "Indicator to display",
+    "panel.region": "Region",
+    "panel.language": "Language",
+    "panel.view.vulnerability": "Vulnerability",
+    "panel.view.connectivity": "Connectivity",
+    "panel.gap.high": "high",
+    "panel.gap.medium": "medium",
+    "panel.gap.low": "low",
+    "panel.connectivity.high": "High",
+    "panel.connectivity.medium": "Medium",
+    "panel.connectivity.low": "Low",
+    "panel.legend.lowConnectivity": "Low / good connectivity",
+    "panel.legend.medium": "Medium",
+    "panel.legend.highGap": "Critical / high gap",
+    "panel.legend.circleSize": "Circle size = population",
+    "panel.vulnerableRegions.title": "Regions by vulnerability",
+    "panel.vulnerableRegions.description": "Vulnerability and connectivity scores by region.",
+    "panel.comparative.title": "Indicator comparison (average by region)",
+    "panel.comparative.description": "Comparison of vulnerability indicators across regions.",
+    "panel.report.badge": "Report {period} · {date}",
+    "panel.footer": "BiT Panel · Report data {period} · {population} people",
+    "panel.loadReportError": "Error loading report",
+    "panel.kpi.totalPopulation": "Total population",
+    "panel.kpi.vulnerabilityScore": "Vulnerability score",
+    "panel.kpi.vulnerablePopulation": "Vulnerable population",
+    "panel.kpi.priorityRegions": "Priority regions",
+    "panel.metric.vulnerabilityScore": "Vulnerability score",
+    "panel.metric.vulnerablePct": "% vulnerable",
+    "panel.metric.connectivity": "Connectivity",
+    "panel.metric.priority": "Priority",
+    "panel.metric.yes": "Yes",
+    "panel.metric.no": "No",
+    "panel.aiAnalysis.title": "Data analysis",
+    "panel.aiAnalysis.metric": "Region: {region}",
+    "panel.aiAnalysis.metricAllRegions": "Region: all",
+    "panel.peopleSuffix": "people",
+    "panel.queryPlaceholder": "Type your question...",
+    "panel.queryTitle": "Natural language query",
+    "panel.querySubtitle": "Ask about gaps, coverage or services by region",
+    "panel.querySubmit": "Submit query",
+    "panel.queryAgentResponse": "Agent response",
+    "panel.queryYouAsked": "Your question",
+    "panel.queryClear": "New query",
+    "panel.queryTable.region": "Region",
+    "panel.queryTable.value": "Value",
+    "panel.queryTable.source": "Source",
+    "panel.querySources": "Sources:",
+    "panel.suggestion.concentration": "Where is there high population concentration but poor network coverage?",
+    "panel.suggestion.digitalGap": "Which areas have the largest digital inclusion gap?",
+    "panel.suggestion.training": "Which regions have the lowest training coverage?",
+    "panel.suggestion.antennas": "Where should new antennas be installed?",
+    "panel.zones.title": "Priority zones",
+    "panel.zones.description": "High population concentration + poor network coverage.",
+    "panel.detail.empty": "Select a zone to view details",
+    "panel.detail.people": "people",
+    "panel.detail.coverage": "coverage",
+    "panel.detail.antennas": "antennas",
+    "panel.detail.gap": "Gap {level}",
+    "panel.detail.networkMix": "Network mix",
+    "panel.detail.indicators": "Indicators",
+    "panel.data.real": "Real data",
+    "panel.data.emulated": "Emulated data",
   },
 };

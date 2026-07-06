@@ -10,7 +10,7 @@ export interface AiQuery {
 
 export interface AiDataItem {
   readonly region: string;
-  readonly value: number;
+  readonly value: number | string;
   readonly source: string;
 }
 

@@ -1,11 +1,12 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -14,7 +15,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: "https://appbit-service-production.up.railway.app",
         changeOrigin: true,
       },
     },
@@ -26,10 +27,5 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/shared/test/test-setup.ts"],
-    css: {
-      modules: {
-        classNameStrategy: "non-scoped",
-      },
-    },
   },
 });
