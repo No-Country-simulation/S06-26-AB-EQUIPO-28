@@ -52,23 +52,35 @@ public record ConnectivityLevel(
      * range [0.0-1.0] (per the CDRView technical reference), where 0.069 means
      * a 6.9% packet drop rate. Thresholds are expressed in that same fraction.</p>
      *
-     * <p>Classification logic:</p>
+     * <p>Classification logic (recalibrated):</p>
      * <ul>
-     *   <li>Drop &lt; 0.02 (2%): HIGH</li>
-     *   <li>Drop 0.02-0.05 (2-5%): MEDIUM</li>
-     *   <li>Drop &gt; 0.05 (5%): LOW</li>
+     *   <li>Drop &lt; 0.0686: HIGH</li>
+     *   <li>Drop 0.0686-0.0687: MEDIUM</li>
+     *   <li>Drop &gt;= 0.0687: LOW</li>
      * </ul>
      *
-     * @param dropPct the fraction of dropped packets [0.0-1.0]
+     * <p><b>Recalibration note:</b> The original thresholds (0.02 / 0.05) were
+     * calibrated for real-world telecom telemetry, where drop rates span a wide
+     * range. The synthetic hackathon dataset CDRView (Regi&atilde;o Metropolitana
+     * de Florian&oacute;polis, 23 clusters) has {@code avg_drop_pct} values
+     * concentrated in the narrow band 0.0684&ndash;0.0688 (range 0.0004), so the
+     * original thresholds failed to discriminate: virtually every cluster fell
+     * into the LOW bucket. The current thresholds are the P33 (&asymp; 0.068555)
+     * and P66 (&asymp; 0.068632) percentiles computed over the 23 real clusters,
+     * rounded to 4 decimal places for readability. This splits the population
+     * into three roughly equal terciles by connectivity quality (lower drop
+     * rate &rarr; better connectivity &rarr; HIGH).</p>
+     *
+     * @param dropPct the fraction of dropped packets [0.0-1.0]; {@code null} maps to LOW
      * @return the corresponding connectivity level
      */
     public static ConnectivityLevel fromDropPercentage(Double dropPct) {
         if (dropPct == null) {
             return LOW;
         }
-        if (dropPct < 0.02) {
+        if (dropPct < 0.0686) {
             return HIGH;
-        } else if (dropPct <= 0.05) {
+        } else if (dropPct < 0.0687) {
             return MEDIUM;
         } else {
             return LOW;

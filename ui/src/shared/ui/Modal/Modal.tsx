@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useCallback } from "react";
-import styles from "./Modal.module.css";
+import { cn } from "@/shared/lib/cn";
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,7 +27,6 @@ export function Modal({ isOpen, onClose, title, closeLabel = "Close", children, 
       previousFocusRef.current = document.activeElement as HTMLElement;
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
-      // Focus the content container
       requestAnimationFrame(() => {
         contentRef.current?.focus();
       });
@@ -40,7 +39,6 @@ export function Modal({ isOpen, onClose, title, closeLabel = "Close", children, 
     };
   }, [isOpen, handleEscape]);
 
-  // Focus trap
   useEffect(() => {
     if (!isOpen) return;
 
@@ -74,7 +72,7 @@ export function Modal({ isOpen, onClose, title, closeLabel = "Close", children, 
   return (
     <div
       ref={overlayRef}
-      className={styles.overlay}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
@@ -84,15 +82,18 @@ export function Modal({ isOpen, onClose, title, closeLabel = "Close", children, 
     >
       <div
         ref={contentRef}
-        className={`${styles.content} ${className ?? ""}`}
+        className={cn(
+          "relative w-full max-w-lg max-h-[calc(100vh-32px)] overflow-y-auto rounded-2xl bg-card p-6 shadow-xl outline-none",
+          className
+        )}
         tabIndex={-1}
       >
         {title && (
-          <div className={styles.header}>
-            <h2 className={styles.title}>{title}</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="m-0 text-xl font-semibold text-foreground">{title}</h2>
             <button
               type="button"
-              className={styles.closeButton}
+              className="flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-muted-foreground cursor-pointer transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
               onClick={onClose}
               aria-label={closeLabel}
             >
@@ -108,7 +109,7 @@ export function Modal({ isOpen, onClose, title, closeLabel = "Close", children, 
             </button>
           </div>
         )}
-        <div className={styles.body}>{children}</div>
+        <div className="text-sm text-foreground leading-relaxed">{children}</div>
       </div>
     </div>
   );

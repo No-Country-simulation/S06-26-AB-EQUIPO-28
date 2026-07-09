@@ -9,3 +9,4 @@ export { InteractiveMapWidget } from "./ui/InteractiveMapWidget.tsx";
 
 export type { Viewport } from "./model/useMapViewport.ts";
 export type { MapDataState } from "./model/useMapData.ts";
+export type { PopupStrings, RegionPoint } from "./ui/MapLibreMap.tsx";

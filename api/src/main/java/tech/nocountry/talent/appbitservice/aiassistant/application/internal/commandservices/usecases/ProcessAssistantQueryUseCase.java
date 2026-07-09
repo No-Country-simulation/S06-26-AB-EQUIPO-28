@@ -66,6 +66,10 @@ public class ProcessAssistantQueryUseCase {
         if (lower.contains("employment") || lower.contains("empleo") || lower.contains("employability") || lower.contains("labor")) {
             sources.add("Employability Data");
         }
+        if (lower.contains("mentor") || lower.contains("mentoria") || lower.contains("program")
+                || lower.contains("tutor") || lower.contains("lider") || lower.contains("comunitari")) {
+            sources.add("Mentorship Programs");
+        }
 
         if (sources.isEmpty()) {
             sources.add("All Available Data");

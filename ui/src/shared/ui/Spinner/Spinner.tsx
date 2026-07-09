@@ -1,4 +1,4 @@
-import styles from "./Spinner.module.css";
+import { cn } from "@/shared/lib/cn";
 
 type SpinnerSize = "sm" | "md" | "lg";
 
@@ -19,7 +19,7 @@ export function Spinner({ size = "md", className, label = "Loading" }: SpinnerPr
 
   return (
     <svg
-      className={`${styles.spinner} ${className ?? ""}`}
+      className={cn("animate-spin text-current", className)}
       width={px}
       height={px}
       viewBox="0 0 24 24"

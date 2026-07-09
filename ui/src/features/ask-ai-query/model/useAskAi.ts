@@ -28,6 +28,13 @@ export function useAskAi(
       return null;
     }
   });
+  const [lastQuestion, setLastQuestion] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem("ai-last-question") ?? "";
+    } catch {
+      return "";
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isLoadingRef = useRef(false);
@@ -48,6 +55,7 @@ export function useAskAi(
         region: options?.region ?? undefined,
       });
       setResponse(result);
+      setLastQuestion(trimmed);
       setQuery("");
     } catch (err) {
       const message =
@@ -64,9 +72,11 @@ export function useAskAi(
   const clearResponse = useCallback(() => {
     setResponse(null);
     setError(null);
+    setLastQuestion("");
     try {
       sessionStorage.removeItem("ai-response");
       sessionStorage.removeItem("ai-query");
+      sessionStorage.removeItem("ai-last-question");
     } catch {
       // sessionStorage unavailable — ignore
     }
@@ -84,6 +94,19 @@ export function useAskAi(
       // sessionStorage unavailable — ignore
     }
   }, [response]);
+
+  // Persist the question that produced the current response
+  useEffect(() => {
+    try {
+      if (lastQuestion) {
+        sessionStorage.setItem("ai-last-question", lastQuestion);
+      } else {
+        sessionStorage.removeItem("ai-last-question");
+      }
+    } catch {
+      // sessionStorage unavailable — ignore
+    }
+  }, [lastQuestion]);
 
   // Persist query text to sessionStorage
   useEffect(() => {
@@ -103,6 +126,7 @@ export function useAskAi(
     setQuery,
     submit,
     response,
+    lastQuestion,
     isLoading,
     error,
     clearResponse,
