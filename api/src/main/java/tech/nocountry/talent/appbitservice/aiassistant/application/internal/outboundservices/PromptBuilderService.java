@@ -31,6 +31,7 @@ public class PromptBuilderService {
         result = result.replace("{{VULNERABLE_REGIONS}}", inclusionData.vulnerableRegions());
         result = result.replace("{{MENTAL_HEALTH_REPORT}}", inclusionData.mentalHealthReport());
         result = result.replace("{{EMPLOYABILITY_DATA}}", inclusionData.employabilityData());
+        result = result.replace("{{MENTORSHIP_DATA}}", inclusionData.mentorshipData());
         return result;
     }
 
@@ -89,7 +90,8 @@ public class PromptBuilderService {
     public record InclusionData(
             String vulnerableRegions,
             String mentalHealthReport,
-            String employabilityData
+            String employabilityData,
+            String mentorshipData
     ) {
     }
 }

@@ -174,6 +174,17 @@ public enum ErrorCodes {
     AIS_LLM_UNAVAILABLE("AIS_002", "El asistente de IA no está disponible en este momento", HttpStatus.SERVICE_UNAVAILABLE),
 
     // ============================================
+    // Mentorship (MEN)
+    // ============================================
+    MEN_GENERAL_ERROR("MEN_001", "Error general del dominio de mentorías", HttpStatus.INTERNAL_SERVER_ERROR),
+    MEN_PROGRAM_NOT_FOUND("MEN_002", "El programa de mentoría no fue encontrado", HttpStatus.NOT_FOUND),
+    MEN_INVALID_FOCUS_AREA("MEN_003", "El área de enfoque de la mentoría es inválida", HttpStatus.BAD_REQUEST),
+    MEN_INVALID_MODALITY("MEN_004", "La modalidad de la mentoría es inválida", HttpStatus.BAD_REQUEST),
+    MEN_INVALID_TARGET_AUDIENCE("MEN_007", "El público objetivo de la mentoría es inválido", HttpStatus.BAD_REQUEST),
+    MEN_GAP_ANALYSIS_ERROR("MEN_005", "Error al analizar las brechas de mentoría", HttpStatus.SERVICE_UNAVAILABLE),
+    MEN_DATA_UNAVAILABLE("MEN_006", "Los datos de mentoría no están disponibles", HttpStatus.SERVICE_UNAVAILABLE),
+
+    // ============================================
     // General / Shared (GEN)
     // ============================================
     GEN_VALIDATION_ERROR("GEN_001", "Error de validación en los datos enviados", HttpStatus.BAD_REQUEST),

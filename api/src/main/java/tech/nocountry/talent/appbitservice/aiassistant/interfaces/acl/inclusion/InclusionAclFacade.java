@@ -12,8 +12,13 @@ import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.internal.hea
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.internal.mentalhealth.MentalHealthInternalEndpoint;
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.rest.resources.MentalHealthReportResource;
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.rest.resources.VulnerableRegionResource;
+import tech.nocountry.talent.appbitservice.mentorship.domain.model.queries.GetMentorshipProgramsQuery;
+import tech.nocountry.talent.appbitservice.mentorship.interfaces.internal.mentorship.MentorshipGapInternalEndpoint;
+import tech.nocountry.talent.appbitservice.mentorship.interfaces.internal.mentorship.MentorshipProgramInternalEndpoint;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ACL Facade for accessing Inclusion Core data.
@@ -25,6 +30,8 @@ import java.util.List;
 public class InclusionAclFacade implements InclusionDataPort {
     private final HealthVulnerabilityInternalEndpoint healthVulnerabilityInternalEndpoint;
     private final MentalHealthInternalEndpoint mentalHealthInternalEndpoint;
+    private final MentorshipProgramInternalEndpoint mentorshipProgramInternalEndpoint;
+    private final MentorshipGapInternalEndpoint mentorshipGapInternalEndpoint;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -35,8 +42,13 @@ public class InclusionAclFacade implements InclusionDataPort {
         String vulnerableRegions = null;
         String mentalHealthReport = null;
         String employabilityData = null;
+        String mentorshipData = "No mentorship data available for this query";
 
         // Determine which data to fetch based on keywords
+        if (containsAny(lowerQuestion, "mentor", "mentoria", "program", "tutor", "lider", "comunitari")) {
+            mentorshipData = fetchMentorshipData(question);
+        }
+
         if (containsAny(lowerQuestion, "vulnerable", "region", "brecha", "gap", "digital")) {
             vulnerableRegions = fetchVulnerableRegions();
         }
@@ -50,7 +62,8 @@ public class InclusionAclFacade implements InclusionDataPort {
         }
 
         // If no specific data identified, fetch all for general context
-        if (vulnerableRegions == null && mentalHealthReport == null && employabilityData == null) {
+        if (vulnerableRegions == null && mentalHealthReport == null && employabilityData == null
+                && "No mentorship data available for this query".equals(mentorshipData)) {
             log.debug("No specific keywords found, fetching all data");
             vulnerableRegions = fetchVulnerableRegions();
             mentalHealthReport = fetchMentalHealthReport();
@@ -60,8 +73,34 @@ public class InclusionAclFacade implements InclusionDataPort {
         return new PromptBuilderService.InclusionData(
                 vulnerableRegions != null ? vulnerableRegions : "No data available",
                 mentalHealthReport != null ? mentalHealthReport : "No data available",
-                employabilityData != null ? employabilityData : "No data available"
+                employabilityData != null ? employabilityData : "No data available",
+                mentorshipData
         );
+    }
+
+    private String fetchMentorshipData(String question) {
+        try {
+            log.info("Fetching mentorship data for question: {}", question);
+            var programsPage = mentorshipProgramInternalEndpoint.getPrograms(GetMentorshipProgramsQuery.withDefaults());
+            var gaps = mentorshipGapInternalEndpoint.getGaps(60, 20, null);
+            Map<String, Object> data = new HashMap<>();
+            data.put("programs", programsPage.content());
+            data.put("gaps", gaps);
+            return objectMapper.writeValueAsString(data);
+        } catch (JacksonException e) {
+            log.warn("Failed to serialize mentorship data, using fallback toString", e);
+            try {
+                var programsPage = mentorshipProgramInternalEndpoint.getPrograms(GetMentorshipProgramsQuery.withDefaults());
+                var gaps = mentorshipGapInternalEndpoint.getGaps(60, 20, null);
+                return Map.of("programs", programsPage.content(), "gaps", gaps).toString();
+            } catch (Exception fallbackEx) {
+                log.error("Fallback serialization also failed", fallbackEx);
+                return "No mentorship data available for this query";
+            }
+        } catch (Exception e) {
+            log.error("Error fetching mentorship data", e);
+            return "No mentorship data available for this query";
+        }
     }
 
     private boolean containsAny(String text, String... keywords) {

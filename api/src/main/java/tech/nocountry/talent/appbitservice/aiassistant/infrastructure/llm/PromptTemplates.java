@@ -27,6 +27,7 @@ public final class PromptTemplates {
             - Vulnerable Regions: {{VULNERABLE_REGIONS}}
             - Mental Health Reports: {{MENTAL_HEALTH_REPORT}}
             - Employability Data: {{EMPLOYABILITY_DATA}}
+            - Mentorship Programs: {{MENTORSHIP_DATA}}
 
             """;
 
