@@ -17,8 +17,21 @@ public record GetMentorshipGapsQuery(
         int maxResults,
         String focusArea
 ) {
-    private static final int DEFAULT_MIN_SCORE = 60;
-    private static final int DEFAULT_MAX_RESULTS = 20;
+    /**
+     * Umbral por defecto del puntaje de vulnerabilidad.
+     *
+     * <p>Calibrado sobre el dataset sintético CDRView (RM de Florianópolis, 23
+     * clusters reales): los clusters con cobertura de mentoría + los 8 clusters
+     * vulnerables sin cobertura arrojan puntajes entre 16 y 51, mientras que los
+     * municipios periféricos remotos (e.g. GOV_CELSO_RAMOS, ANTONIO_CARLOS)
+     * puntúan 11. Un umbral de 15 separa limpiamente ambos grupos y recupera los
+     * 23 clusters esperados (15 con programas + 8 sin programas). El umbral
+     * anterior (60) era mayor que cualquier puntaje calculado, por lo que el
+     * ACL de inclusioncore devolvía una lista vacía y {@code /mentorship/gaps}
+     * respondía {@code []}.</p>
+     */
+    private static final int DEFAULT_MIN_SCORE = 15;
+    private static final int DEFAULT_MAX_RESULTS = 30;
     private static final int SCORE_MIN = 0;
     private static final int SCORE_MAX = 100;
     private static final int RESULTS_MIN = 1;
@@ -42,7 +55,7 @@ public record GetMentorshipGapsQuery(
     }
 
     /**
-     * Factory con valores por defecto: umbral de vulnerabilidad 60, 20 resultados,
+     * Factory con valores por defecto: umbral de vulnerabilidad 15, 30 resultados,
      * sin filtro de área de enfoco.
      *
      * @return query por defecto

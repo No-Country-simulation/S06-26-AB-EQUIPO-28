@@ -20,6 +20,14 @@ import {
 } from "@/entities/mobility-data";
 import type { RegionRepository } from "@/entities/region";
 import { toRegion } from "@/entities/region";
+import type { MentorshipRepository } from "@/entities/mentorship";
+import { toProgram, toGap, toCluster } from "@/entities/mentorship";
+import type { EmployabilityRepository } from "@/entities/employability";
+import {
+  toOdPair,
+  toTravelTime,
+  toEmployabilityGap,
+} from "@/entities/employability";
 import type {
   DataQueryResponse,
   MapRegionItem,
@@ -27,6 +35,12 @@ import type {
   ConcentrationItem,
   HealthReportResource,
   VulnerableRegionItem,
+  MentorshipProgramDto,
+  MentorshipGapDto,
+  MentorshipClusterSummaryDto,
+  MobilityODPairDto,
+  TravelTimeDto,
+  EmployabilityGapDto,
 } from "@/shared/api";
 
 // ---------------------------------------------------------------------------
@@ -307,5 +321,80 @@ export const mentalHealthRepository: MentalHealthRepository = {
     const body = await res.json();
     const items = Array.isArray(body) ? body : (body as { content?: unknown[] }).content ?? [];
     return items.map((item: unknown) => toMentalHealthRegionDetail(item as VulnerableRegionItem));
+  },
+};
+
+// ---------------------------------------------------------------------------
+// MentorshipRepository — adapter for /api/v1/mentorship/*
+// ---------------------------------------------------------------------------
+
+export const mentorshipRepository: MentorshipRepository = {
+  async getPrograms() {
+    const all = await fetchAllPages<MentorshipProgramDto>(
+      "/api/v1/mentorship/programs",
+      new URLSearchParams(),
+      5,
+      20,
+    );
+    return all.map(toProgram);
+  },
+
+  async getGaps() {
+    const res = await fetch("/api/v1/mentorship/gaps");
+    if (res.status === 404) return [];
+    if (!res.ok)
+      throw new Error(`Error al obtener brechas de mentoría (${res.status})`);
+
+    const body = await res.json();
+    const arr = resolveArray<MentorshipGapDto>(body);
+    return arr.map(toGap);
+  },
+
+  async getClusters() {
+    const res = await fetch("/api/v1/mentorship/clusters");
+    if (res.status === 404) return [];
+    if (!res.ok)
+      throw new Error(`Error al obtener clusters de mentoría (${res.status})`);
+
+    const body = await res.json();
+    const arr = resolveArray<MentorshipClusterSummaryDto>(body);
+    return arr.map(toCluster);
+  },
+};
+
+// ---------------------------------------------------------------------------
+// EmployabilityRepository — adapter for /api/v1/employability/*
+// ---------------------------------------------------------------------------
+
+export const employabilityRepository: EmployabilityRepository = {
+  async getOdMatrix() {
+    const all = await fetchAllPages<MobilityODPairDto>(
+      "/api/v1/employability/od-matrix",
+      new URLSearchParams(),
+      10,
+      100,
+    );
+    return all.map(toOdPair);
+  },
+
+  async getTravelTimes() {
+    const all = await fetchAllPages<TravelTimeDto>(
+      "/api/v1/employability/travel-times",
+      new URLSearchParams(),
+      5,
+      100,
+    );
+    return all.map(toTravelTime);
+  },
+
+  async getGaps() {
+    const res = await fetch("/api/v1/employability/gaps");
+    if (res.status === 404) return [];
+    if (!res.ok)
+      throw new Error(`Error al obtener brechas de empleabilidad (${res.status})`);
+
+    const body = await res.json();
+    const arr = resolveArray<EmployabilityGapDto>(body);
+    return arr.map(toEmployabilityGap);
   },
 };

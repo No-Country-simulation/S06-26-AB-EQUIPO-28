@@ -25,8 +25,8 @@ public class MentorshipGapController implements MentorshipGapDocs {
     @Override
     @GetMapping
     public ResponseEntity<List<MentorshipGapResource>> getGaps(
-            @RequestParam(defaultValue = "60") int minVulnerabilityScore,
-            @RequestParam(defaultValue = "20") int maxResults,
+            @RequestParam(defaultValue = "15") int minVulnerabilityScore,
+            @RequestParam(defaultValue = "30") int maxResults,
             @RequestParam(required = false) String focusArea
     ) {
         var resources = internalEndpoint.getGaps(minVulnerabilityScore, maxResults, focusArea);

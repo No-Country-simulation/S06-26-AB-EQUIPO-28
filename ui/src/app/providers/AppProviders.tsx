@@ -19,6 +19,8 @@ import {
   mobilityDataRepository,
   indicatorRepository,
   mentalHealthRepository,
+  mentorshipRepository,
+  employabilityRepository,
 } from "./repositories.ts";
 
 const APP_CONTEXT_VALUE: AppContextValue = {
@@ -27,6 +29,8 @@ const APP_CONTEXT_VALUE: AppContextValue = {
   mobilityDataRepository,
   indicatorRepository,
   mentalHealthRepository,
+  mentorshipRepository,
+  employabilityRepository,
 };
 
 interface AppProvidersProps {

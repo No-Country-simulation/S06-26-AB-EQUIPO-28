@@ -42,7 +42,7 @@ class GetMentorshipGapsUseCaseTest {
         var vulnerableCluster = new VulnerableClusterAclResult(
                 "clusterA", 85, "HIGH", 5000, 10000, 0.5, "LOW", 0.0, true);
 
-        when(inclusionCoreAclPort.getVulnerableRegions(60, 20, false))
+        when(inclusionCoreAclPort.getVulnerableRegions(15, 30, false))
                 .thenReturn(List.of(vulnerableCluster));
         when(repo.findByIsActiveTrue()).thenReturn(List.of());
 

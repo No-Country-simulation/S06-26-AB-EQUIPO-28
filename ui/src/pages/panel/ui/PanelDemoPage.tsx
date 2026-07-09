@@ -3,8 +3,6 @@
 import { useState, useCallback, useMemo } from "react"
 import {
   useLanguage,
-  getDataSources,
-  getAiMethodology,
   formatLocaleNumber,
   formatLocaleDate,
   LOCALES,
@@ -16,15 +14,17 @@ import { useRegionFilter } from "@/features/filter-by-region"
 import { useAskAi } from "@/features/ask-ai-query"
 import { useAlertMonitor, AlertHistoryPanel } from "@/features/alert-monitor"
 import { useExportPdf } from "@/shared/lib/pdf-export"
-import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPanel } from "@/widgets/panel"
+import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPanel, MentorshipGapsPanel, MentorshipProgramsPanel, EmployabilityGapsPanel, EmployabilityOdMatrixPanel } from "@/widgets/panel"
 import { InteractiveMapWidget } from "@/widgets/interactive-map"
 import type { RegionPoint } from "@/widgets/interactive-map"
 import { Card, Spinner, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
-import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, BookOpen, Bell, FileDown } from "lucide-react"
+import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase } from "lucide-react"
 import { type Period, PERIOD_TRANSLATION_KEY } from "../model/filter-bar-types.ts"
 import { usePanelData } from "../model/usePanelData.ts"
+import { useMentorshipData } from "../model/useMentorshipData.ts"
+import { useEmployabilityData } from "../model/useEmployabilityData.ts"
 
-type Section = "mapa" | "consulta" | "comparativo" | "metodologia"
+type Section = "mapa" | "consulta" | "comparativo" | "mentorias" | "empleabilidad"
 type Vista = "vulnerabilidad" | "conectividad"
 
 function vulnerabilityLevelToBrecha(level: string, t: (key: TranslationKey) => string): string {
@@ -75,7 +75,7 @@ function SidebarItem({ icon: Icon, label, active, onClick }: { icon: React.Compo
 
 export function PanelDemoPage() {
   const { locale, setLocale, t } = useLanguage()
-  const { regionRepository, aiAgentRepository, indicatorRepository, mentalHealthRepository, mobilityDataRepository } = useAppContext()
+  const { regionRepository, aiAgentRepository, indicatorRepository, mentalHealthRepository, mobilityDataRepository, mentorshipRepository, employabilityRepository } = useAppContext()
 
   const { regions, selectedRegionId, setSelectedRegion, selectedRegion } = useRegionFilter(regionRepository)
 
@@ -85,6 +85,9 @@ export function PanelDemoPage() {
     selectedRegionId,
     t("panel.loadReportError"),
   )
+
+  const mentorshipData = useMentorshipData(mentorshipRepository, t("panel.loadReportError"))
+  const employabilityData = useEmployabilityData(employabilityRepository, t("panel.loadReportError"))
 
   const [selectedZoneName, setSelectedZoneName] = useState<string | null>(null)
   const [vista, setVista] = useState<Vista>("vulnerabilidad")
@@ -274,7 +277,8 @@ export function PanelDemoPage() {
     { key: "mapa", icon: MapIcon, label: t("panel.map") },
     { key: "consulta", icon: Sparkles, label: t("panel.query") },
     { key: "comparativo", icon: BarChart3, label: t("panel.comparative"), hidden: !showComparativo },
-    { key: "metodologia", icon: BookOpen, label: t("nav.methodology") },
+    { key: "mentorias", icon: Users, label: t("panel.mentorship") },
+    { key: "empleabilidad", icon: Briefcase, label: t("panel.employability") },
   ]
 
   if (reportLoading || vulnLoading) {
@@ -402,7 +406,7 @@ export function PanelDemoPage() {
         </aside>
 
         <main className="min-w-0 flex-1 py-5 pl-4 md:pl-6">
-          {report && section !== "metodologia" && (
+          {report && (section === "mapa" || section === "consulta" || section === "comparativo") && (
             <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1">
                 <span className="h-2 w-2 rounded-full bg-ok" />
@@ -414,7 +418,7 @@ export function PanelDemoPage() {
             </div>
           )}
 
-          {section !== "metodologia" && <KpiCards items={kpiItems} />}
+          {(section === "mapa" || section === "consulta" || section === "comparativo") && <KpiCards items={kpiItems} />}
 
           {section === "mapa" && (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -553,8 +557,53 @@ export function PanelDemoPage() {
             </div>
           )}
 
-          {section === "metodologia" && (
-            <MetodologiaContent />
+          {section === "mentorias" && (
+            <div className="mt-4">
+              <div className="mb-3">
+                <h1 className="text-lg font-semibold text-foreground">{t("panel.mentorship.title")}</h1>
+              </div>
+              {mentorshipData.loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Spinner size="lg" />
+                </div>
+              ) : mentorshipData.error && mentorshipData.gaps.length === 0 && mentorshipData.programs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                  <TriangleAlert className="h-8 w-8 text-destructive" />
+                  <p className="text-sm text-destructive">{mentorshipData.error}</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <MentorshipGapsPanel gaps={mentorshipData.gaps} />
+                  <MentorshipProgramsPanel
+                    programs={mentorshipData.programs}
+                    clusters={mentorshipData.clusters}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {section === "empleabilidad" && (
+            <div className="mt-4">
+              <div className="mb-3">
+                <h1 className="text-lg font-semibold text-foreground">{t("panel.employability.title")}</h1>
+              </div>
+              {employabilityData.loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Spinner size="lg" />
+                </div>
+              ) : employabilityData.error && employabilityData.gaps.length === 0 && employabilityData.odMatrix.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                  <TriangleAlert className="h-8 w-8 text-destructive" />
+                  <p className="text-sm text-destructive">{employabilityData.error}</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <EmployabilityGapsPanel gaps={employabilityData.gaps} />
+                  <EmployabilityOdMatrixPanel odMatrix={employabilityData.odMatrix} />
+                </div>
+              )}
+            </div>
           )}
         </main>
       </div>
@@ -565,67 +614,6 @@ export function PanelDemoPage() {
           population: report ? formatLocaleNumber(report.metadata.totalPopulation, locale) : "—",
         })}
       </footer>
-    </div>
-  )
-}
-
-function MetodologiaContent() {
-  const { t, locale } = useLanguage()
-  const sources = getDataSources(locale)
-  const aiMethods = getAiMethodology(locale)
-
-  return (
-    <div className="max-w-5xl">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">{t("methodology.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("methodology.subtitle")}</p>
-      </header>
-
-      <section className="mb-10">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">{t("methodology.dataSources")}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {sources.map((source) => (
-            <article key={source.name} className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-              <h3 className="mb-1.5 text-sm font-semibold text-foreground">{source.name}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{source.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">{t("methodology.aiMethodology")}</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {aiMethods.map((method) => (
-            <div key={method.title} className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-              <h3 className="mb-1.5 text-sm font-semibold text-foreground">{method.title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{method.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold text-foreground">{t("methodology.privacy")}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-            <h3 className="mb-1.5 text-sm font-semibold text-foreground">{t("methodology.syntheticData")}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t("methodology.syntheticDataDesc")}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-            <h3 className="mb-1.5 text-sm font-semibold text-foreground">{t("methodology.anonymization")}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t("methodology.anonymizationDesc")}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-            <h3 className="mb-1.5 text-sm font-semibold text-foreground">{t("methodology.lgpd")}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t("methodology.lgpdDesc")}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4 ring-1 ring-foreground/5">
-            <h3 className="mb-1.5 text-sm font-semibold text-foreground">{t("methodology.security")}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t("methodology.securityDesc")}</p>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

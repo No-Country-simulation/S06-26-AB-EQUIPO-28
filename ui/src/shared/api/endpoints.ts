@@ -147,3 +147,133 @@ export interface ConcentrationPaginatedResource {
   readonly pageSize: number;
   readonly totalPages: number;
 }
+
+// ─── Mentorship ───────────────────────────────────────────────
+
+export interface MentorshipProgramDto {
+  readonly programId: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly organization?: string;
+  readonly focusArea: string;
+  readonly modality: string;
+  readonly targetAudience?: string;
+  readonly targetIncomeLevel?: string;
+  readonly clusterName: string;
+  readonly totalCapacity?: number;
+  readonly activeMentees: number;
+  readonly startDate?: string;
+  readonly endDate?: string;
+  readonly isActive: boolean;
+  readonly websiteUrl?: string;
+  readonly contactEmail?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface MentorshipProgramPaginatedDto {
+  readonly content: readonly MentorshipProgramDto[];
+  readonly totalElements: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly totalPages: number;
+}
+
+export interface MentorshipProgramSummaryDto {
+  readonly programId: string;
+  readonly name: string;
+  readonly focusArea: string;
+  readonly modality: string;
+  readonly isActive: boolean;
+}
+
+export interface MentorshipGapDto {
+  readonly clusterName: string;
+  readonly vulnerabilityScore: number;
+  readonly vulnerabilityLevel: string;
+  readonly vulnerablePopulationCount: number;
+  readonly totalPopulation: number;
+  readonly vulnerablePercentage: number;
+  readonly connectivityLevel: string;
+  readonly concentrationIndex: number;
+  readonly isPriorityForIntervention: boolean;
+  readonly hasMentorshipPrograms: boolean;
+  readonly matchingPrograms: readonly MentorshipProgramSummaryDto[];
+  readonly gapSeverity: string;
+}
+
+export interface MentorshipClusterSummaryDto {
+  readonly clusterName: string;
+  readonly totalPrograms: number;
+  readonly activePrograms: number;
+  readonly focusAreas: readonly string[];
+  readonly modalities: readonly string[];
+  readonly targetAudiences: readonly string[];
+  readonly totalCapacity: number;
+  readonly totalActiveMentees: number;
+  readonly programs: readonly MentorshipProgramSummaryDto[];
+}
+
+// ─── Employability ────────────────────────────────────────────
+
+export interface MobilityODPairDto {
+  readonly originCluster: string;
+  readonly originMunicipio?: string;
+  readonly originLatitude: number;
+  readonly originLongitude: number;
+  readonly destinationCluster: string;
+  readonly destinationMunicipio?: string;
+  readonly destinationLatitude: number;
+  readonly destinationLongitude: number;
+  readonly sameCluster: boolean;
+  readonly uniqueUsers: number;
+  readonly totalTrips: number;
+  readonly averageDistanceKm: number;
+  readonly predominantPeriod: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface MobilityODPairPaginatedDto {
+  readonly content: readonly MobilityODPairDto[];
+  readonly totalElements: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly totalPages: number;
+}
+
+export interface TravelTimeDto {
+  readonly originCluster: string;
+  readonly destinationCluster: string;
+  readonly sameCluster: boolean;
+  readonly observations: number;
+  readonly averageDistanceKm: number;
+  readonly p25DistanceKm?: number;
+  readonly p75DistanceKm?: number;
+  readonly predominantPeriod: string;
+}
+
+export interface TravelTimePaginatedDto {
+  readonly content: readonly TravelTimeDto[];
+  readonly totalElements: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly totalPages: number;
+}
+
+export interface EmployabilityGapDto {
+  readonly cluster: string;
+  readonly municipalities: readonly string[];
+  readonly citizenCount: number;
+  readonly incomeDCount: number;
+  readonly incomeCCount: number;
+  readonly youthCount18_24: number;
+  readonly hasTelemetryCoverage: boolean;
+  readonly daytimeAvgUsers: number;
+  readonly outboundTripsToHubs: number;
+  readonly distanceToNearestHubKm: number;
+  readonly mobilityIntensity: string;
+  readonly gapSeverity: string;
+  readonly gapScore: number;
+  readonly primaryFactors: readonly string[];
+}

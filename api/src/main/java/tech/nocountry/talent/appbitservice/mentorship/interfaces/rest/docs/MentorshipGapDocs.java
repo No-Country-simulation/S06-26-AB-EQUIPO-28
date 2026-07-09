@@ -46,11 +46,11 @@ public interface MentorshipGapDocs {
             )
     })
     ResponseEntity<List<MentorshipGapResource>> getGaps(
-            @Parameter(description = "Puntaje mínimo de vulnerabilidad (0-100, default: 60)", example = "60")
-            @RequestParam(defaultValue = "60") int minVulnerabilityScore,
+            @Parameter(description = "Puntaje mínimo de vulnerabilidad (0-100, default: 15)", example = "15")
+            @RequestParam(defaultValue = "15") int minVulnerabilityScore,
 
-            @Parameter(description = "Número máximo de resultados (1-1000, default: 20)", example = "20")
-            @RequestParam(defaultValue = "20") int maxResults,
+            @Parameter(description = "Número máximo de resultados (1-1000, default: 30)", example = "30")
+            @RequestParam(defaultValue = "30") int maxResults,
 
             @Parameter(description = "Filtrar brechas por área de enfoque específica: TECH, EMPLOYMENT, HEALTH, CULTURE, EDUCATION, GENERAL.")
             @RequestParam(required = false) String focusArea

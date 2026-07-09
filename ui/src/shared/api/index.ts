@@ -31,4 +31,16 @@ export type {
   // GET /telemetry/concentration
   ConcentrationItem,
   ConcentrationPaginatedResource,
+  // Mentorship
+  MentorshipProgramDto,
+  MentorshipProgramPaginatedDto,
+  MentorshipProgramSummaryDto,
+  MentorshipGapDto,
+  MentorshipClusterSummaryDto,
+  // Employability
+  MobilityODPairDto,
+  MobilityODPairPaginatedDto,
+  TravelTimeDto,
+  TravelTimePaginatedDto,
+  EmployabilityGapDto,
 } from "./endpoints.ts";
