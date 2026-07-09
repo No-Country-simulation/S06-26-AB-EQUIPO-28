@@ -1,1 +1,9 @@
-export { Card } from "./Card.tsx";
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
+} from "./Card.tsx";

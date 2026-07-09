@@ -1,16 +1,3 @@
-// ---------------------------------------------------------------------------
-// InteractiveMapWidget — MapLibre GL JS map widget.
-//
-// Displays antenna markers (coloured by load level), concentration pins
-// (sized by intensity), and a legend overlay.
-//
-// Uses a two-phase render: on mount it tries to dynamically import
-// MapLibreMap.  If the import succeeds (maplibre-gl is installed) the
-// live map is shown; otherwise a styled placeholder is displayed.
-//
-// Map tiles: OpenFreeMap (https://tiles.openfreemap.org/styles/liberty).
-// ---------------------------------------------------------------------------
-
 import React, { Suspense } from "react";
 import { useLanguage } from "@/shared/lib/i18n";
 import type { MobilityDataRepository } from "@/entities/mobility-data";
@@ -19,8 +6,7 @@ import { useMapData } from "../model/useMapData.ts";
 import { useMapViewport } from "../model/useMapViewport.ts";
 import { MapContainer } from "./MapContainer.tsx";
 import { MapLegend } from "./MapLegend.tsx";
-import type { PopupStrings } from "./MapLibreMap.tsx";
-import styles from "./InteractiveMapWidget.module.css";
+import type { PopupStrings, RegionPoint } from "./MapLibreMap.tsx";
 
 const LazyMapLibreMap = React.lazy(
   () => import("./MapLibreMap").then((m) => ({ default: m.MapLibreMap })),
@@ -33,6 +19,9 @@ interface InteractiveMapWidgetProps {
   vulnerableOnly?: boolean;
   showAntennas?: boolean;
   popupStrings?: PopupStrings;
+  regions?: RegionPoint[];
+  selectedRegionId?: string | null;
+  onRegionSelect?: (id: string) => void;
 }
 
 export function InteractiveMapWidget({
@@ -42,6 +31,9 @@ export function InteractiveMapWidget({
   vulnerableOnly = false,
   showAntennas = true,
   popupStrings,
+  regions,
+  selectedRegionId,
+  onRegionSelect,
 }: InteractiveMapWidgetProps) {
   const { t } = useLanguage();
   const { antennas, pins, legend, isLoading, error } = useMapData(
@@ -52,42 +44,32 @@ export function InteractiveMapWidget({
   );
   const { viewport } = useMapViewport();
 
-  console.log("[InteractiveMapWidget] render — antennas:", antennas.length, "pins:", pins.length);
-
   return (
-    <section className={styles.widget} aria-label={t("map.title")}>
+    <section className="relative h-full w-full" aria-label={t("map.title")}>
       <MapContainer>
-        {/* ── Map or placeholder ──────────────────────────────────── */}
         <Suspense fallback={<MapPlaceholder />}>
           <LazyMapLibreMap
             antennas={antennas}
             pins={pins}
+            regions={regions}
+            selectedRegionId={selectedRegionId}
+            onRegionSelect={onRegionSelect}
             viewport={viewport}
             showAntennas={showAntennas}
             popupStrings={popupStrings}
           />
         </Suspense>
 
-        {/* ── Loading overlay ──────────────────────────────────────── */}
         {isLoading && (
-          <div className={styles.loadingOverlay}>
+          <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 bg-white/60">
             <Spinner size="md" />
-            <span className={styles.loadingText}>{t("map.loading")}</span>
+            <span className="text-sm text-muted-foreground">{t("map.loading")}</span>
           </div>
         )}
 
-        {/* ── Error banner ─────────────────────────────────────────── */}
         {error && (
-          <div className={styles.errorBanner} role="alert">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
+          <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -96,60 +78,33 @@ export function InteractiveMapWidget({
           </div>
         )}
 
-        {/* ── Empty state (no data and no error) ─────────────────── */}
-        {!isLoading && !error && antennas.length === 0 && pins.length === 0 && (
-          <div className={styles.emptyState}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
+        {!isLoading && !error && antennas.length === 0 && pins.length === 0 && (regions?.length ?? 0) === 0 && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4" />
               <path d="M12 8h.01" />
             </svg>
-            <span>{t("common.noData")}</span>
+            <span className="text-sm">{t("common.noData")}</span>
           </div>
         )}
 
-        {/* ── Legend ───────────────────────────────────────────────── */}
         {!isLoading && legend.length > 0 && <MapLegend legend={legend} />}
       </MapContainer>
     </section>
   );
 }
 
-// ---------------------------------------------------------------------------
-// MapPlaceholder — Rendered when maplibre-gl is not installed.
-// ---------------------------------------------------------------------------
-
 function MapPlaceholder() {
   const { t } = useLanguage();
   return (
-    <div className={styles.placeholder}>
-      <svg
-        className={styles.placeholderIcon}
-        width="48"
-        height="48"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
+    <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl bg-muted/50 p-6">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground" aria-hidden="true">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
         <circle cx="12" cy="10" r="3" />
       </svg>
-      <p className={styles.placeholderTitle}>{t("map.title")}</p>
-      <p className={styles.placeholderSubtitle}>{t("map.placeholder")}</p>
+      <p className="m-0 text-sm font-semibold text-foreground">{t("map.title")}</p>
+      <p className="m-0 text-xs text-muted-foreground">{t("map.placeholder")}</p>
     </div>
   );
 }

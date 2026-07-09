@@ -8,28 +8,23 @@ describe("Badge", () => {
     expect(screen.getByText("Active")).toBeInTheDocument();
   });
 
-  it("renders with success variant", () => {
-    render(<Badge variant="success">OK</Badge>);
-    expect(screen.getByText("OK")).toBeInTheDocument();
-  });
-
-  it("renders with warning variant", () => {
-    render(<Badge variant="warning">Warning</Badge>);
-    expect(screen.getByText("Warning")).toBeInTheDocument();
-  });
-
-  it("renders with error variant", () => {
-    render(<Badge variant="error">Error</Badge>);
-    expect(screen.getByText("Error")).toBeInTheDocument();
-  });
-
-  it("renders with info variant", () => {
-    render(<Badge variant="info">Info</Badge>);
-    expect(screen.getByText("Info")).toBeInTheDocument();
-  });
-
-  it("renders with neutral variant by default", () => {
-    render(<Badge>Default</Badge>);
+  it("renders with default variant", () => {
+    render(<Badge variant="default">Default</Badge>);
     expect(screen.getByText("Default")).toBeInTheDocument();
+  });
+
+  it("renders with secondary variant", () => {
+    render(<Badge variant="secondary">Secondary</Badge>);
+    expect(screen.getByText("Secondary")).toBeInTheDocument();
+  });
+
+  it("renders with destructive variant", () => {
+    render(<Badge variant="destructive">Destructive</Badge>);
+    expect(screen.getByText("Destructive")).toBeInTheDocument();
+  });
+
+  it("renders with outline variant", () => {
+    render(<Badge variant="outline">Outline</Badge>);
+    expect(screen.getByText("Outline")).toBeInTheDocument();
   });
 });

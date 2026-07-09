@@ -1,13 +1,5 @@
-// ---------------------------------------------------------------------------
-// MapLegend — Floating legend box pinned to the bottom-left of the map.
-//
-// Displays colour swatches with labels from the concentration data so users
-// understand what each gradient level represents.
-// ---------------------------------------------------------------------------
-
 import type { ConcentrationLegend } from "@/entities/mobility-data";
 import { useLanguage } from "@/shared/lib/i18n";
-import styles from "./MapLegend.module.css";
 
 interface MapLegendProps {
   legend: ConcentrationLegend[];
@@ -19,17 +11,17 @@ export function MapLegend({ legend }: MapLegendProps) {
   if (legend.length === 0) return null;
 
   return (
-    <div className={styles.legend} aria-label={t("map.legend.title")}>
-      <p className={styles.title}>{t("map.legend.title")}</p>
-      <ul className={styles.list}>
+    <div className="absolute bottom-4 left-4 z-10 rounded-xl border border-border bg-card/90 p-3 shadow-sm backdrop-blur-sm" aria-label={t("map.legend.title")}>
+      <p className="m-0 mb-2 text-xs font-semibold text-foreground">{t("map.legend.title")}</p>
+      <ul className="m-0 list-none p-0 flex flex-col gap-1.5">
         {legend.map((item, index) => (
-          <li key={`legend-${index}`} className={styles.item}>
+          <li key={`legend-${index}`} className="flex items-center gap-2">
             <span
-              className={styles.swatch}
+              className="inline-block size-3 rounded-sm shrink-0"
               style={{ backgroundColor: item.color }}
               aria-hidden="true"
             />
-            <span className={styles.label}>{item.label}</span>
+            <span className="text-[11px] text-muted-foreground">{item.label}</span>
           </li>
         ))}
       </ul>

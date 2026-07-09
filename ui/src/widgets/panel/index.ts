@@ -1,0 +1,6 @@
+export { PanelHeader } from "./ui/PanelHeader"
+export { KpiCards } from "./ui/KpiCards"
+export { DetallePanel } from "./ui/DetallePanel"
+export { ZonasPanel } from "./ui/ZonasPanel"
+export { Comparativo } from "./ui/Comparativo"
+export { AiQueryPanel } from "./ui/AiQueryPanel"

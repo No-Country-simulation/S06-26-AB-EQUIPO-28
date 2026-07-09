@@ -1,0 +1,8 @@
+allowBuilds:
+  core-js: true
+
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - react-router-dom@7.18.1
+  - react-router@7.18.1
+trustPolicy: no-downgrade

@@ -1,14 +1,5 @@
-// ---------------------------------------------------------------------------
-// AppLayout — Application shell with persistent navbar.
-//
-// Wraps every routed page in a flex column that fills the full viewport.
-// The Navbar is fixed at top, and the main content area sits below it
-// (64 px offset for the fixed nav).
-// ---------------------------------------------------------------------------
-
 import { type ReactNode } from "react";
 import { Navbar } from "./Navbar.tsx";
-import styles from "./AppLayout.module.css";
 
 interface AppLayoutProps {
   readonly children: ReactNode;
@@ -16,9 +7,9 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className={styles.layout}>
+    <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className={styles.content}>{children}</main>
+      <main className="mt-16 flex flex-1 flex-col">{children}</main>
     </div>
   );
 }

@@ -35,9 +35,22 @@ export interface PopupStrings {
   intensityLabel: string;
 }
 
+export interface RegionPoint {
+  id: string;
+  label: string;
+  lat: number;
+  lng: number;
+  color: string;
+  radius: number;
+  value: number;
+}
+
 export interface MapLibreMapProps {
   antennas: Antenna[];
   pins: ConcentrationPin[];
+  regions?: RegionPoint[];
+  selectedRegionId?: string | null;
+  onRegionSelect?: (id: string) => void;
   viewport: Viewport;
   showAntennas?: boolean;
   popupStrings?: PopupStrings;
@@ -145,7 +158,35 @@ function buildPinFeatures(pins: ConcentrationPin[]): {
   };
 }
 
-export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, popupStrings }: MapLibreMapProps) {
+// -----------------------------------------------------------------------
+// Helper — builds GeoJSON FeatureCollection from region vulnerability points
+// -----------------------------------------------------------------------
+
+function buildRegionFeatures(
+  regions: RegionPoint[],
+  selectedRegionId: string | null | undefined,
+): { type: "FeatureCollection"; features: GeoJSONFeature[] } {
+  return {
+    type: "FeatureCollection",
+    features: regions.map((r) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [r.lng ?? 0, r.lat ?? 0],
+      },
+      properties: {
+        id: r.id,
+        label: r.label,
+        color: r.color,
+        radius: r.radius,
+        value: r.value,
+        selected: r.id === selectedRegionId,
+      },
+    })),
+  };
+}
+
+export function MapLibreMap({ antennas, pins, regions = [], selectedRegionId = null, onRegionSelect, viewport, showAntennas = true, popupStrings }: MapLibreMapProps) {
   console.log("[MapLibreMap] render — antennas:", antennas.length, "pins:", pins.length, "showAntennas:", showAntennas);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapShim | null>(null);
@@ -156,6 +197,16 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
   antennasRef.current = antennas;
   const pinsRef = useRef(pins);
   pinsRef.current = pins;
+  const regionsRef = useRef(regions);
+  regionsRef.current = regions;
+  const selectedRegionIdRef = useRef(selectedRegionId);
+  selectedRegionIdRef.current = selectedRegionId;
+  const onRegionSelectRef = useRef(onRegionSelect);
+  onRegionSelectRef.current = onRegionSelect;
+  const viewportRef = useRef(viewport);
+  viewportRef.current = viewport;
+  const popupStringsRef = useRef(popupStrings);
+  popupStringsRef.current = popupStrings;
 
   // ── Phase 1: initialise map once on mount ───────────────────────────
   useEffect(() => {
@@ -174,8 +225,8 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
         map = new maplibregl.Map({
           container: containerRef.current,
           style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-          center: [viewport.lng, viewport.lat],
-          zoom: viewport.zoom,
+          center: [viewportRef.current.lng, viewportRef.current.lat],
+          zoom: viewportRef.current.zoom,
           attributionControl: false,
         }) as unknown as MapShim;
 
@@ -311,6 +362,54 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
             },
           });
 
+          /* ── Region vulnerability/connectivity circles ────────── */
+          map.addSource("regions", {
+            type: "geojson",
+            data: buildRegionFeatures(regionsRef.current, selectedRegionIdRef.current),
+          });
+
+          map.addLayer({
+            id: "regions-layer",
+            type: "circle",
+            source: "regions",
+            paint: {
+              "circle-radius": ["get", "radius"],
+              "circle-color": ["get", "color"],
+              "circle-opacity": 0.55,
+              "circle-stroke-width": ["case", ["get", "selected"], 3, 1.5],
+              "circle-stroke-color": ["case", ["get", "selected"], "#ffffff", ["get", "color"]],
+            },
+          });
+
+          map.on("click", "regions-layer", (e: MapClickEvent) => {
+            if (!e.features?.[0] || !map) return;
+            const feat = e.features[0];
+            const props = feat.properties;
+            const coords = feat.geometry.coordinates.slice() as [number, number];
+
+            const id = props?.id;
+            if (typeof id === "string" && onRegionSelectRef.current) {
+              onRegionSelectRef.current(id);
+            }
+
+            if (currentPopup) currentPopup.remove();
+            const popup = new maplibregl.Popup()
+              .setLngLat(coords)
+              .setHTML(
+                `<strong>${String(props?.label ?? "")}</strong><br/>Valor: ${String(props?.value ?? "N/A")}`,
+              );
+            // @ts-ignore — MapShim vs ambient Map type conflict
+            popup.addTo(map);
+            currentPopup = popup as unknown as { remove: () => void };
+          });
+
+          map.on("mouseenter", "regions-layer", () => {
+            if (map) map.getCanvas().style.cursor = "pointer";
+          });
+          map.on("mouseleave", "regions-layer", () => {
+            if (map) map.getCanvas().style.cursor = "";
+          });
+
           /* ── Click popups ─────────────────────────────────────── */
           map.on(
             "click",
@@ -326,8 +425,8 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
               const popup = new maplibregl.Popup()
                 .setLngLat(coords)
                 .setHTML(
-                  `<strong>${String(props?.name ?? popupStrings?.antennaLabel ?? "Antena")}</strong><br/>` +
-                    `${popupStrings?.loadLabel ?? "Carga"}: ${String(props?.loadLevel ?? "N/A")}`,
+                  `<strong>${String(props?.name ?? popupStringsRef.current?.antennaLabel ?? "Antena")}</strong><br/>` +
+                    `${popupStringsRef.current?.loadLabel ?? "Carga"}: ${String(props?.loadLevel ?? "N/A")}`,
                 );
               // @ts-ignore — MapShim vs ambient Map type conflict
               popup.addTo(map);
@@ -349,8 +448,8 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
               const popup = new maplibregl.Popup()
                 .setLngLat(coords)
                 .setHTML(
-                  `<strong>${popupStrings?.concentrationPoint ?? "Punto de concentración"}</strong><br/>` +
-                    `${popupStrings?.intensityLabel ?? "Intensidad"}: ${String(props?.intensity ?? "N/A")}`,
+                  `<strong>${popupStringsRef.current?.concentrationPoint ?? "Punto de concentración"}</strong><br/>` +
+                    `${popupStringsRef.current?.intensityLabel ?? "Intensidad"}: ${String(props?.intensity ?? "N/A")}`,
                 );
               // @ts-ignore — MapShim vs ambient Map type conflict
               popup.addTo(map);
@@ -412,8 +511,6 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
         mapRef.current = null;
       }
     };
-    // Re-initialise only on mount/unmount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Phase 2: update GeoJSON sources when data changes ──────────────
@@ -443,7 +540,16 @@ export function MapLibreMap({ antennas, pins, viewport, showAntennas = true, pop
     } catch {
       // Source not yet added — skip.
     }
-  }, [antennas, pins]);
+
+    try {
+      const regionSource = map.getSource("regions");
+      if (regionSource) {
+        regionSource.setData(buildRegionFeatures(regions, selectedRegionId));
+      }
+    } catch {
+      // Source not yet added — skip.
+    }
+  }, [antennas, pins, regions, selectedRegionId]);
 
   // ── Phase 3: toggle antenna layer visibility ───────────────────────
   useEffect(() => {

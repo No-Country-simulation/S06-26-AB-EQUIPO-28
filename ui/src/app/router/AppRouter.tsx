@@ -3,13 +3,13 @@
 //
 // Defines the top-level route table.  All routes are wrapped in AppLayout
 // which provides the persistent navbar shell.  Unknown paths and the root
-// ("/") redirect to the map view — the primary interface.
+// ("/") redirect to the panel — the primary interface.
 //
 // Route structure:
-//   /           → redirect → /mapa
-//   /mapa       → MapViewPage (map-centric main view)
+//   /           → redirect → /panel
+//   /panel      → PanelDemoPage (unified map + dashboard view)
 //   /metodologia → MethodologyPage
-//   *           → redirect → /mapa
+//   *           → redirect → /panel
 // ---------------------------------------------------------------------------
 
 import {
@@ -18,8 +18,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { MapViewPage } from "@/pages/map-view";
 import { MethodologyPage } from "@/pages/methodology";
+import { PanelDemoPage } from "@/pages/panel";
 import { AppLayout } from "@/app/layout";
 
 export function AppRouter() {
@@ -29,13 +29,13 @@ export function AppRouter() {
         <Routes>
           <Route
             path="/"
-            element={<Navigate to="/mapa" replace />}
+            element={<Navigate to="/panel" replace />}
           />
-          <Route path="/mapa" element={<MapViewPage />} />
           <Route path="/metodologia" element={<MethodologyPage />} />
+          <Route path="/panel" element={<PanelDemoPage />} />
           <Route
             path="*"
-            element={<Navigate to="/mapa" replace />}
+            element={<Navigate to="/panel" replace />}
           />
         </Routes>
       </AppLayout>
