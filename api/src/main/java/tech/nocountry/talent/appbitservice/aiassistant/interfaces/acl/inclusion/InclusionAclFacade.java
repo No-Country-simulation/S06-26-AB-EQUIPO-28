@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import tech.nocountry.talent.appbitservice.aiassistant.application.internal.outboundservices.InclusionDataPort;
 import tech.nocountry.talent.appbitservice.aiassistant.application.internal.outboundservices.PromptBuilderService;
 import tech.nocountry.talent.appbitservice.aiassistant.domain.exceptions.InclusionDataUnavailableException;
+import tech.nocountry.talent.appbitservice.employability.interfaces.internal.employability.EmployabilityGapInternalEndpoint;
+import tech.nocountry.talent.appbitservice.employability.interfaces.rest.resources.EmployabilityGapResource;
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.internal.healthvulnerability.HealthVulnerabilityInternalEndpoint;
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.internal.mentalhealth.MentalHealthInternalEndpoint;
 import tech.nocountry.talent.appbitservice.inclusioncore.interfaces.rest.resources.MentalHealthReportResource;
@@ -32,6 +34,7 @@ public class InclusionAclFacade implements InclusionDataPort {
     private final MentalHealthInternalEndpoint mentalHealthInternalEndpoint;
     private final MentorshipProgramInternalEndpoint mentorshipProgramInternalEndpoint;
     private final MentorshipGapInternalEndpoint mentorshipGapInternalEndpoint;
+    private final EmployabilityGapInternalEndpoint employabilityGapInternalEndpoint;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -57,7 +60,8 @@ public class InclusionAclFacade implements InclusionDataPort {
             mentalHealthReport = fetchMentalHealthReport();
         }
 
-        if (containsAny(lowerQuestion, "employment", "empleo", "employability", "labor")) {
+        if (containsAny(lowerQuestion, "employment", "empleo", "employability", "labor",
+                "trabalho", "deslocamento", "movilidad", "viagem", "emprego")) {
             employabilityData = fetchEmployabilityData();
         }
 
@@ -139,12 +143,13 @@ public class InclusionAclFacade implements InclusionDataPort {
 
     private String fetchEmployabilityData() {
         try {
-            List<VulnerableRegionResource> regions = healthVulnerabilityInternalEndpoint.getVulnerableRegions(
-                    0,
-                    5,
+            List<EmployabilityGapResource> gaps = employabilityGapInternalEndpoint.getGaps(
+                    20,
+                    null,
+                    null,
                     false
             );
-            return "[PROXY DATA — uses vulnerable regions as proxy for employment gaps] " + toJson(regions);
+            return toJson(gaps);
         } catch (Exception e) {
             throw new InclusionDataUnavailableException("Error fetching employability data: " + e.getMessage(), e);
         }

@@ -63,7 +63,9 @@ public class ProcessAssistantQueryUseCase {
         if (lower.contains("mental") || lower.contains("health") || lower.contains("salud")) {
             sources.add("Mental Health Reports");
         }
-        if (lower.contains("employment") || lower.contains("empleo") || lower.contains("employability") || lower.contains("labor")) {
+        if (lower.contains("employment") || lower.contains("empleo") || lower.contains("employability") || lower.contains("labor")
+                || lower.contains("trabajo") || lower.contains("trabalho") || lower.contains("deslocamento")
+                || lower.contains("movilidad") || lower.contains("viagem") || lower.contains("emprego")) {
             sources.add("Employability Data");
         }
         if (lower.contains("mentor") || lower.contains("mentoria") || lower.contains("program")

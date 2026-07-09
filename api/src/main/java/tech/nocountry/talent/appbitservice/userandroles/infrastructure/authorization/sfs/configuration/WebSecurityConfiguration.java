@@ -107,6 +107,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
+                                "/api/v1/employability/**",
                                 "/api/v1/mentorship/**",
                                 "/api/v1/telemetry/**",
                                 "/api/v1/inclusion/**",

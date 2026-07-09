@@ -185,6 +185,17 @@ public enum ErrorCodes {
     MEN_DATA_UNAVAILABLE("MEN_006", "Los datos de mentoría no están disponibles", HttpStatus.SERVICE_UNAVAILABLE),
 
     // ============================================
+    // Employability (EMP) - mobility OD matrix & gap analysis
+    // NOTE: prefix EMPB_ distinguishes from Employee Management (EMP_xxx).
+    // ============================================
+    EMP_GENERAL_ERROR("EMPB_001", "Error general del dominio de empleabilidad", HttpStatus.INTERNAL_SERVER_ERROR),
+    EMP_OD_PAIR_NOT_FOUND("EMPB_002", "El par origen-destino de movilidad no fue encontrado", HttpStatus.NOT_FOUND),
+    EMP_INVALID_CLUSTER("EMPB_003", "La referencia al cluster es inválida", HttpStatus.BAD_REQUEST),
+    EMP_INVALID_SESSION_PERIOD("EMPB_004", "El período de sesión es inválido", HttpStatus.BAD_REQUEST),
+    EMP_GAP_ANALYSIS_ERROR("EMPB_005", "Error al analizar las brechas de empleabilidad", HttpStatus.SERVICE_UNAVAILABLE),
+    EMP_DATA_UNAVAILABLE("EMPB_006", "Los datos de empleabilidad no están disponibles", HttpStatus.SERVICE_UNAVAILABLE),
+
+    // ============================================
     // General / Shared (GEN)
     // ============================================
     GEN_VALIDATION_ERROR("GEN_001", "Error de validación en los datos enviados", HttpStatus.BAD_REQUEST),

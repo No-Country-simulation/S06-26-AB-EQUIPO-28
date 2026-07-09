@@ -40,3 +40,32 @@ CREATE TABLE staging.tensor_concentracao (
     lat DOUBLE PRECISION,
     lon DOUBLE PRECISION
 );
+
+-- 4. Tabla idéntica a tensor_od.csv
+CREATE TABLE IF NOT EXISTS staging.tensor_od (
+    cluster_origem VARCHAR(100),
+    municipio_origem VARCHAR(100),
+    lat_origem DOUBLE PRECISION,
+    lon_origem DOUBLE PRECISION,
+    cluster_destino VARCHAR(100),
+    municipio_destino VARCHAR(100),
+    lat_destino DOUBLE PRECISION,
+    lon_destino DOUBLE PRECISION,
+    mesmo_cluster SMALLINT,
+    n_usuarios INTEGER,
+    n_viagens INTEGER,
+    dist_media_km DOUBLE PRECISION,
+    periodo_predominante VARCHAR(20)
+);
+
+-- 5. Tabla idéntica a tensor_tempo_deslocamento.csv
+CREATE TABLE IF NOT EXISTS staging.tensor_tempo_deslocamento (
+    cluster_origem VARCHAR(100),
+    cluster_destino VARCHAR(100),
+    mesmo_cluster SMALLINT,
+    n_observacoes INTEGER,
+    dist_media_km DOUBLE PRECISION,
+    dist_p25_km DOUBLE PRECISION,
+    dist_p75_km DOUBLE PRECISION,
+    periodo_predominante VARCHAR(20)
+);
