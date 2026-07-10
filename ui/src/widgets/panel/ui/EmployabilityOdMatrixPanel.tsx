@@ -47,8 +47,8 @@ export function EmployabilityOdMatrixPanel({
   ];
 
   const rows = topCorridors.map((pair) => ({
-    origin: `${pair.originCluster}${pair.sameCluster ? " (self)" : ""}`,
-    destination: `${pair.destinationCluster}${pair.sameCluster ? " (self)" : ""}`,
+    origin: `${pair.originCluster}${pair.sameCluster ? ` ${t("panel.employability.sameCluster")}` : ""}`,
+    destination: `${pair.destinationCluster}${pair.sameCluster ? ` ${t("panel.employability.sameCluster")}` : ""}`,
     uniqueUsers: formatLocaleNumber(pair.uniqueUsers, locale),
     totalTrips: formatLocaleNumber(pair.totalTrips, locale),
     avgDistance: `${pair.averageDistanceKm.toFixed(1)} km`,

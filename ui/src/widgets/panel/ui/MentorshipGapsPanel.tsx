@@ -9,7 +9,7 @@
 import { Users, SignalHigh, TriangleAlert, CheckCircle2, XCircle } from "lucide-react";
 import { Card, Badge, ScrollArea } from "@/shared/ui";
 import { cn } from "@/shared/lib/cn";
-import { useLanguage } from "@/shared/lib/i18n";
+import { useLanguage, formatLocaleNumber } from "@/shared/lib/i18n";
 import type {
   MentorshipGap,
   MentorshipGapSeverity,
@@ -35,7 +35,7 @@ export function MentorshipGapsPanel({
   description,
   emptyMessage,
 }: MentorshipGapsPanelProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const resolvedTitle = title ?? t("panel.mentorship.gaps");
   const resolvedEmpty = emptyMessage ?? t("common.noData");
 
@@ -114,9 +114,9 @@ export function MentorshipGapsPanel({
                   <span>
                     {t("panel.mentorship.vulnerablePop")}:{" "}
                     <span className="font-mono font-medium text-foreground">
-                      {gap.vulnerablePopulationCount.toLocaleString()}
+                      {formatLocaleNumber(gap.vulnerablePopulationCount, locale)}
                     </span>{" "}
-                    / {gap.totalPopulation.toLocaleString()}
+                    / {formatLocaleNumber(gap.totalPopulation, locale)}
                   </span>
                 </div>
 

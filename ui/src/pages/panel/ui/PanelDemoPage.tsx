@@ -5,7 +5,6 @@ import {
   useLanguage,
   formatLocaleNumber,
   formatLocaleDate,
-  LOCALES,
   type Locale,
   type TranslationKey,
 } from "@/shared/lib/i18n"
@@ -18,13 +17,13 @@ import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPa
 import { InteractiveMapWidget } from "@/widgets/interactive-map"
 import type { RegionPoint } from "@/widgets/interactive-map"
 import { Card, Spinner, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
-import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase } from "lucide-react"
+import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, LayoutDashboard } from "lucide-react"
 import { type Period, PERIOD_TRANSLATION_KEY } from "../model/filter-bar-types.ts"
 import { usePanelData } from "../model/usePanelData.ts"
 import { useMentorshipData } from "../model/useMentorshipData.ts"
 import { useEmployabilityData } from "../model/useEmployabilityData.ts"
 
-type Section = "mapa" | "consulta" | "comparativo" | "mentorias" | "empleabilidad"
+type Section = "dashboard" | "mapa" | "consulta" | "comparativo" | "mentorias" | "empleabilidad"
 type Vista = "vulnerabilidad" | "conectividad"
 
 function vulnerabilityLevelToBrecha(level: string, t: (key: TranslationKey) => string): string {
@@ -91,7 +90,7 @@ export function PanelDemoPage() {
 
   const [selectedZoneName, setSelectedZoneName] = useState<string | null>(null)
   const [vista, setVista] = useState<Vista>("vulnerabilidad")
-  const [section, setSection] = useState<Section>("mapa")
+  const [section, setSection] = useState<Section>("dashboard")
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("morning")
   const [showAntennas, setShowAntennas] = useState(true)
@@ -99,7 +98,7 @@ export function PanelDemoPage() {
   const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
 
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
-    useAskAi(aiAgentRepository, { region: selectedRegionId })
+    useAskAi(aiAgentRepository, { region: selectedRegionId, language: locale, errorFallback: t("dashboard.error") })
 
   const { unacknowledgedCount } = useAlertMonitor(indicators, selectedRegionId, selectedRegion?.name)
 
@@ -274,6 +273,7 @@ export function PanelDemoPage() {
   const showComparativo = comparativoRegiones.length >= 2
 
   const sidebarItems: { key: Section; icon: React.ComponentType<{ className?: string }>; label: string; hidden?: boolean }[] = [
+    { key: "dashboard", icon: LayoutDashboard, label: t("panel.dashboard") },
     { key: "mapa", icon: MapIcon, label: t("panel.map") },
     { key: "consulta", icon: Sparkles, label: t("panel.query") },
     { key: "comparativo", icon: BarChart3, label: t("panel.comparative"), hidden: !showComparativo },
@@ -299,11 +299,13 @@ export function PanelDemoPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <PanelHeader
         regions={regionOptions}
         selectedRegionId={selectedRegionId ?? regionOptions[0]?.id ?? ""}
         onRegionChange={setSelectedRegion}
+        locale={locale}
+        onLocaleChange={(l) => setLocale(l as Locale)}
       >
         <div className="flex items-center gap-2">
           <button
@@ -354,26 +356,10 @@ export function PanelDemoPage() {
               {item.label}
             </button>
           ))}
-        <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5 ml-auto">
-          {(Object.keys(LOCALES) as Locale[]).map((l) => (
-            <button
-              key={l}
-              type="button"
-              onClick={() => setLocale(l)}
-              className={`rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors ${
-                locale === l
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-350 flex-1 px-4 md:px-6">
-        <aside className="hidden w-56 shrink-0 border-r border-border py-5 pr-4 md:block">
+      <div className="mx-auto flex min-h-0 w-full max-w-350 flex-1 px-4 md:px-6">
+        <aside className="hidden w-56 shrink-0 overflow-y-auto border-r border-border py-5 pr-4 md:block">
           <nav className="flex flex-col gap-1">
             {sidebarItems
               .filter((item) => !item.hidden)
@@ -387,38 +373,28 @@ export function PanelDemoPage() {
                 />
               ))}
           </nav>
-          <div className="mt-6 flex items-center gap-1 rounded-lg bg-muted p-1">
-            {(Object.keys(LOCALES) as Locale[]).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLocale(l)}
-                className={`flex-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors ${
-                  locale === l
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
         </aside>
 
-        <main className="min-w-0 flex-1 py-5 pl-4 md:pl-6">
-          {report && (section === "mapa" || section === "consulta" || section === "comparativo") && (
-            <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1">
-                <span className="h-2 w-2 rounded-full bg-ok" />
-                {t("panel.report.badge", {
-                  period: report.reportPeriod,
-                  date: formatLocaleDate(report.generatedAt, locale),
-                })}
-              </span>
+        <main className="min-w-0 flex-1 overflow-y-auto py-5 pl-4 md:pl-6">
+          {section === "dashboard" && (
+            <div>
+              <div className="mb-3">
+                <h1 className="text-lg font-semibold text-foreground">{t("panel.dashboard.title")}</h1>
+              </div>
+              {report && (
+                <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1">
+                    <span className="h-2 w-2 rounded-full bg-ok" />
+                    {t("panel.report.badge", {
+                      period: report.reportPeriod,
+                      date: formatLocaleDate(report.generatedAt, locale),
+                    })}
+                  </span>
+                </div>
+              )}
+              <KpiCards items={kpiItems} />
             </div>
           )}
-
-          {(section === "mapa" || section === "consulta" || section === "comparativo") && <KpiCards items={kpiItems} />}
 
           {section === "mapa" && (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">

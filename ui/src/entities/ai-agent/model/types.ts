@@ -6,6 +6,8 @@ export interface AiQuery {
   readonly question: string;
   readonly indicator?: string;
   readonly region?: string;
+  /** ISO language code ("es" | "pt" | "en") the answer should be written in. */
+  readonly language?: string;
 }
 
 export interface AiDataItem {

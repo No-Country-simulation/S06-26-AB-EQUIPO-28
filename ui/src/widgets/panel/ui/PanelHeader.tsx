@@ -1,4 +1,4 @@
-import { Activity, Globe } from "lucide-react"
+import { Activity, Globe, Languages } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -13,6 +13,12 @@ interface RegionOption {
   id: string
   label: string
 }
+
+const LANGUAGE_OPTIONS = [
+  { value: "es", label: "Español" },
+  { value: "pt", label: "Português" },
+  { value: "en", label: "English" },
+]
 
 interface PanelHeaderProps {
   title?: string
@@ -38,15 +44,15 @@ export function PanelHeader({
   const { t } = useLanguage()
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
+    <header className="z-20 shrink-0 border-b border-border bg-background">
       <div className="mx-auto flex max-w-350 flex-wrap items-center gap-3 px-4 py-3 md:px-6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Activity className="h-5 w-5" />
           </div>
-          <div>
-            <h1 className="text-sm font-semibold leading-tight md:text-base">{title ?? t("panel.title")}</h1>
-            <p className="text-[11px] text-muted-foreground">{subtitle ?? t("panel.subtitle")}</p>
+          <div className="min-w-0">
+            <h1 className="truncate text-sm font-semibold leading-tight md:text-base">{title ?? t("panel.title")}</h1>
+            <p className="hidden truncate text-[11px] text-muted-foreground sm:block">{subtitle ?? t("panel.subtitle")}</p>
           </div>
         </div>
 
@@ -70,14 +76,21 @@ export function PanelHeader({
           </Select>
 
           {locale && onLocaleChange && (
-            <Select value={locale} onValueChange={(v) => v && onLocaleChange(v)}>
-              <SelectTrigger className="w-23" aria-label={t("panel.language")}>
+            <Select
+              items={LANGUAGE_OPTIONS}
+              value={locale}
+              onValueChange={(v) => v && onLocaleChange(v)}
+            >
+              <SelectTrigger className="w-25" aria-label={t("panel.language")}>
+                <Languages className="h-4 w-4 shrink-0 text-primary" />
                 <SelectValue>{() => locale.toUpperCase()}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="es">ES</SelectItem>
-                <SelectItem value="pt">PT</SelectItem>
-                <SelectItem value="en">EN</SelectItem>
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           )}
