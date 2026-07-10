@@ -11,7 +11,14 @@ import type { AiAgentRepository, AiResponse } from "@/entities/ai-agent";
 
 export function useAskAi(
   repository: AiAgentRepository,
-  options?: { region?: string | null; indicator?: string | null },
+  options?: {
+    region?: string | null;
+    indicator?: string | null;
+    /** Language code the AI should answer in (defaults to "es" at the adapter). */
+    language?: string;
+    /** Localized message shown when the request fails without a message. */
+    errorFallback?: string;
+  },
 ) {
   const [query, setQuery] = useState(() => {
     try {
@@ -53,6 +60,7 @@ export function useAskAi(
         question: trimmed,
         indicator: options?.indicator ?? undefined,
         region: options?.region ?? undefined,
+        language: options?.language,
       });
       setResponse(result);
       setLastQuestion(trimmed);
@@ -61,13 +69,13 @@ export function useAskAi(
       const message =
         err instanceof Error
           ? err.message
-          : "Ocurrió un error al procesar la consulta.";
+          : (options?.errorFallback ?? "Ocurrió un error al procesar la consulta.");
       setError(message);
     } finally {
       setIsLoading(false);
       isLoadingRef.current = false;
     }
-  }, [query, repository, options?.region, options?.indicator]);
+  }, [query, repository, options?.region, options?.indicator, options?.language, options?.errorFallback]);
 
   const clearResponse = useCallback(() => {
     setResponse(null);

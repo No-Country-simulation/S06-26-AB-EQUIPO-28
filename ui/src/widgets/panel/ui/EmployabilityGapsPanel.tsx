@@ -130,32 +130,32 @@ export function EmployabilityGapsPanel({
                     <div className="font-mono text-base font-semibold">
                       {formatLocaleNumber(gap.citizenCount, locale)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">citizens</div>
+                    <div className="text-[10px] text-muted-foreground">{t("panel.employability.citizens")}</div>
                   </div>
                   <div className="rounded-lg bg-secondary/40 p-2">
                     <div className="font-mono text-base font-semibold">
                       {formatLocaleNumber(gap.incomeDCount, locale)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">income D</div>
+                    <div className="text-[10px] text-muted-foreground">{t("panel.employability.incomeD")}</div>
                   </div>
                   <div className="rounded-lg bg-secondary/40 p-2">
                     <div className="font-mono text-base font-semibold">
                       {formatLocaleNumber(gap.youthCount18_24, locale)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">youth 18-24</div>
+                    <div className="text-[10px] text-muted-foreground">{t("panel.employability.youth")}</div>
                   </div>
                 </div>
 
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
                     <UsersIcon className="h-3 w-3" />
-                    daytime avg:{" "}
+                    {t("panel.employability.daytimeAvg")}:{" "}
                     <span className="font-mono font-medium text-foreground">
                       {formatLocaleNumber(gap.daytimeAvgUsers, locale)}
                     </span>
                   </span>
                   <span>
-                    nearest hub:{" "}
+                    {t("panel.employability.nearestHub")}:{" "}
                     <span className="font-mono font-medium text-foreground">
                       {gap.distanceToNearestHubKm.toFixed(1)} km
                     </span>

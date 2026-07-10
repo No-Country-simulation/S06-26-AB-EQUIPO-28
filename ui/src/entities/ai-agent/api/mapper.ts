@@ -17,7 +17,7 @@ export function toAskAiRequest(query: AiQuery): DataQueryRequest {
   return {
     query: query.question,
     filters: Object.keys(filters).length > 0 ? filters : undefined,
-    language: "es",
+    language: query.language ?? "es",
   };
 }
 

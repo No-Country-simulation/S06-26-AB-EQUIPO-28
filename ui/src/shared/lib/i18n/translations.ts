@@ -260,6 +260,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.employability.avgDistance": "Distancia media",
     "panel.employability.period": "Periodo",
     "panel.employability.topNBy": "Top 10 por",
+    "panel.employability.citizens": "Ciudadanos",
+    "panel.employability.incomeD": "Ingresos D",
+    "panel.employability.youth": "Jóvenes 18-24",
+    "panel.employability.daytimeAvg": "Prom. diurno",
+    "panel.employability.nearestHub": "Hub más cercano",
+    "panel.employability.sameCluster": "(mismo clúster)",
+
+    //  Dashboard
+    "panel.dashboard": "Dashboard",
+    "panel.dashboard.title": "Resumen general",
   },
 
   pt: {
@@ -502,6 +512,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.employability.avgDistance": "Distância média",
     "panel.employability.period": "Período",
     "panel.employability.topNBy": "Top 10 por",
+    "panel.employability.citizens": "Cidadãos",
+    "panel.employability.incomeD": "Renda D",
+    "panel.employability.youth": "Jovens 18-24",
+    "panel.employability.daytimeAvg": "Média diurna",
+    "panel.employability.nearestHub": "Hub mais próximo",
+    "panel.employability.sameCluster": "(mesmo cluster)",
+
+    //  Dashboard
+    "panel.dashboard": "Dashboard",
+    "panel.dashboard.title": "Resumo geral",
   },
 
   en: {
@@ -744,5 +764,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.employability.avgDistance": "Avg distance",
     "panel.employability.period": "Period",
     "panel.employability.topNBy": "Top 10 by",
+    "panel.employability.citizens": "Citizens",
+    "panel.employability.incomeD": "Income D",
+    "panel.employability.youth": "Youth 18-24",
+    "panel.employability.daytimeAvg": "Daytime avg",
+    "panel.employability.nearestHub": "Nearest hub",
+    "panel.employability.sameCluster": "(same cluster)",
+
+    //  Dashboard
+    "panel.dashboard": "Dashboard",
+    "panel.dashboard.title": "Overview",
   },
 };
