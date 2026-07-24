@@ -338,7 +338,7 @@ function Features() {
               role="listitem"
               style={{ transitionDelay: `${index * 80}ms` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
               <div className="relative z-10">
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon name={feature.icon} size={22} />
@@ -420,7 +420,7 @@ function HowItWorks() {
                   <h3 className="text-xl font-semibold text-foreground mb-2">{step.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{step.description}</p>
                 </div>
-                <div className="relative flex-shrink-0 lg:w-1/2">
+                <div className="relative shrink-0 lg:w-1/2">
                   <div
                     className={`relative aspect-square max-w-sm mx-auto rounded-2xl bg-card border border-border/50 overflow-hidden ${
                       index % 2 === 0 ? "lg:ml-auto" : "lg:mr-auto"
@@ -432,7 +432,7 @@ function HowItWorks() {
                       interactive={false}
                     />
                   </div>
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary border-4 bg-background hidden lg:block" aria-hidden="true" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary border-4 hidden lg:block" aria-hidden="true" />
                 </div>
               </div>
             ))}
@@ -519,10 +519,15 @@ function Footer() {
     <footer className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" role="contentinfo">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-semibold font-mono">
-            App BiT
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-semibold font-mono text-sm" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
+              <path d="M12 6v6l4 2" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+            </svg>
           </span>
-          <span className="text-sm font-medium text-foreground">Panel de Datos Públicos</span>
+          <span className="text-sm font-semibold text-foreground">App BiT</span>
+          <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[10px] font-medium text-primary-foreground bg-primary rounded">Panel de Datos Públicos</span>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
