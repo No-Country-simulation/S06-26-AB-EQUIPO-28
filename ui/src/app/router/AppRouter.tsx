@@ -6,7 +6,7 @@
 // ("/") redirect to the panel — the primary interface.
 //
 // Route structure:
-//   /           → redirect → /panel
+//   /           → LandingPage
 //   /panel      → PanelDemoPage (unified map + dashboard view)
 //   /metodologia → MethodologyPage
 //   *           → redirect → /panel
@@ -18,6 +18,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { LandingPage } from "@/pages/landing";
 import { MethodologyPage } from "@/pages/methodology";
 import { PanelDemoPage } from "@/pages/panel";
 import { AppLayout } from "@/app/layout";
@@ -27,10 +28,7 @@ export function AppRouter() {
     <BrowserRouter>
       <AppLayout>
         <Routes>
-          <Route
-            path="/"
-            element={<Navigate to="/panel" replace />}
-          />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/metodologia" element={<MethodologyPage />} />
           <Route path="/panel" element={<PanelDemoPage />} />
           <Route
