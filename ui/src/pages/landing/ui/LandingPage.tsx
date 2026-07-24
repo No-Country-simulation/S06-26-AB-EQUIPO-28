@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/Button";
 import { LandingMap } from "./LandingMap.tsx";
 import heroImage from "@/assets/hero.png";
@@ -125,67 +126,16 @@ function Icon({
   }
 }
 
-const STATS = [
-  { value: "2.500+", label: "Regiones analizadas" },
-  { value: "12", label: "Indicadores cruzados" },
-  { value: "94%", label: "Cobertura de datos" },
-  { value: "Tiempo real", label: "Actualizaciones" },
-];
-
 const FEATURES = [
-  {
-    icon: "grafico",
-    title: "Diagnóstico territorial",
-    description:
-      "Cruza empleabilidad, salud mental y movilidad para detectar brechas de inclusión en cada zona.",
-    detail: "Índice compuesto ponderado por población vulnerable",
-  },
-  {
-    icon: "chat",
-    title: "Consulta en lenguaje natural",
-    description:
-      "Pregunta «¿Dónde hay mayor brecha de empleabilidad y peor conectividad?» y obtén respuesta con datos.",
-    detail: "IA entrenada con metodología validada por expertos",
-  },
-  {
-    icon: "mapa",
-    title: "Mapa interactivo priorizado",
-    description:
-      "Visualiza zonas críticas, filtra por período y compara regiones lado a lado.",
-    detail: "Capas: vulnerabilidad, antenas, flujo OD, equipamientos",
-  },
-  {
-    icon: "personas",
-    title: "Foco en población vulnerable",
-    description:
-      "Identifica automáticamente barrios con alta concentración de personas en riesgo de exclusión.",
-    detail: "Alertas configurables por umbral de puntuación",
-  },
-  {
-    icon: "doc",
-    title: "Metodología transparente",
-    description:
-      "Todas las fuentes citadas: datos abiertos gubernamentales, series históricas anonimizadas.",
-    detail: "Código abierto, reproducible, auditable",
-  },
-  {
-    icon: "check",
-    title: "Recomendaciones accionables",
-    description:
-      "Cada consulta devuelve: hallazgos, fuentes, nivel de confianza y acción sugerida.",
-    detail: "Exportable a PDF para informes técnicos",
-  },
+  { icon: "grafico", key: "diagnosis" },
+  { icon: "chat", key: "query" },
+  { icon: "mapa", key: "map" },
+  { icon: "personas", key: "vulnerable" },
+  { icon: "doc", key: "methodology" },
+  { icon: "check", key: "recommendations" },
 ];
 
-const SOURCES = [
-  { name: "Ministerio de Trabajo", desc: "Encuesta de Empleo y Ocupación" },
-  { name: "Ministerio de Salud", desc: "Sistema de Vigilancia en Salud Mental" },
-  { name: "INE / IBGE", desc: "Censo y proyecciones poblacionales" },
-  { name: "ANTEL / ENACOM", desc: "Cobertura y calidad de red móvil" },
-  { name: "Datos abiertos municipales", desc: "Equipamientos, transporte, uso de suelo" },
-];
-
-function Hero() {
+function Hero({ t }: { t: (key: string) => string }) {
   const [visible, setVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
 
@@ -215,22 +165,18 @@ function Hero() {
         >
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
             <Icon name="escudo" size={14} />
-            App BiT — Panel de Datos Públicos
+            {t("landing.hero.badge")}
           </span>
 
           <h1
             id="hero-title"
             className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]"
           >
-            Datos territoriales para
-            <br />
-            <span className="text-primary">decidir dónde impacta más</span>
+            {t("landing.hero.title")}
           </h1>
 
           <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            Cruza empleabilidad, salud mental y movilidad en un solo mapa.
-            Detecta brechas de inclusión, consulta en lenguaje natural y
-            obtén recomendaciones con fuentes verificadas.
+            {t("landing.hero.description")}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -241,7 +187,7 @@ function Hero() {
               onClick={() => document.getElementById("mapa")?.scrollIntoView({ behavior: "smooth" })}
             >
               <Icon name="mapa" size={18} className="mr-2 group-hover:translate-x-0.5 transition-transform" />
-              Explorar mapa inteligente
+              {t("landing.hero.cta.primary")}
             </Button>
             <Button
               variant="outline"
@@ -249,7 +195,7 @@ function Hero() {
               className="h-11 px-6"
               onClick={() => document.getElementById("metodologia")?.scrollIntoView({ behavior: "smooth" })}
             >
-              Ver metodología
+              {t("landing.hero.cta.secondary")}
               <Icon name="flecha" size={16} className="ml-2" />
             </Button>
           </div>
@@ -262,19 +208,46 @@ function Hero() {
           role="list"
           aria-label="Estadísticas clave"
         >
-          {STATS.map((stat, i) => (
-            <div
-              key={stat.label}
-              className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
-              style={{ animationDelay: `${i * 100}ms` }}
-              role="listitem"
-            >
-              <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                {stat.value}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground font-medium">{stat.label}</div>
+          <div
+            key="regions"
+            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
+            role="listitem"
+          >
+            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              2.500+
             </div>
-          ))}
+            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.regions")}</div>
+          </div>
+          <div
+            key="indicators"
+            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
+            role="listitem"
+          >
+            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              12
+            </div>
+            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.indicators")}</div>
+          </div>
+          <div
+            key="coverage"
+            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
+            role="listitem"
+          >
+            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              94%
+            </div>
+            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.coverage")}</div>
+          </div>
+          <div
+            key="realtime"
+            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
+            role="listitem"
+          >
+            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Tiempo real
+            </div>
+            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.realtime")}</div>
+          </div>
         </div>
       </div>
 
@@ -285,7 +258,7 @@ function Hero() {
   );
 }
 
-function Features() {
+function Features({ t }: { t: (key: string) => string }) {
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -316,18 +289,17 @@ function Features() {
             id="features-title"
             className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground"
           >
-            Lo que permite el panel
+            {t("landing.features.title")}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-            Seis capacidades diseñadas para que técnicos y tomadores de decisión
-            actúen con evidencia, no con intuición.
+            {t("landing.features.subtitle")}
           </p>
         </header>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
           {FEATURES.map((feature, index) => (
             <article
-              key={feature.title}
+              key={feature.key}
               data-index={index}
               data-feature-card
               className={`group relative rounded-2xl border border-border/50 bg-card p-6 transition-all duration-500 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 ${
@@ -343,11 +315,11 @@ function Features() {
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon name={feature.icon} size={22} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed mb-3">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t(`landing.feature.${feature.key}.title`)}</h3>
+                <p className="text-muted-foreground leading-relaxed mb-3">{t(`landing.feature.${feature.key}.description`)}</p>
                 <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
                   <Icon name="flecha" size={12} />
-                  <span>{feature.detail}</span>
+                  <span>{t(`landing.feature.${feature.key}.detail`)}</span>
                 </div>
               </div>
             </article>
@@ -358,34 +330,26 @@ function Features() {
   );
 }
 
-function HowItWorks() {
+function HowItWorks({ t }: { t: (key: string) => string }) {
   const steps = [
     {
       number: "01",
-      title: "Selecciona el territorio",
-      description:
-        "Navega el mapa o usa el buscador para elegir una región, municipio o barrio específico.",
+      key: "step1",
       mapView: { center: [-56.16, -34.9] as [number, number], zoom: 9 },
     },
     {
       number: "02",
-      title: "Consulta en lenguaje natural",
-      description:
-        "Escribe tu pregunta: «¿Qué zonas tienen alta vulnerabilidad y mala conectividad en horario nocturno?»",
+      key: "step2",
       mapView: { center: [-56.16, -34.9] as [number, number], zoom: 10.5 },
     },
     {
       number: "03",
-      title: "Recibe respuesta fundamentada",
-      description:
-        "Obtén hallazgos con datos, fuentes citadas, nivel de confianza y una recomendación concreta.",
+      key: "step3",
       mapView: { center: [-56.18, -34.88] as [number, number], zoom: 11 },
     },
     {
       number: "04",
-      title: "Exporta y comparte",
-      description:
-        "Genera PDFs para informes técnicos, comparte enlaces directos o integra vía API en tus sistemas.",
+      key: "step4",
       mapView: { center: [-56.16, -34.9] as [number, number], zoom: 9 },
     },
   ];
@@ -395,10 +359,10 @@ function HowItWorks() {
       <div className="max-w-6xl mx-auto">
         <header className="text-center max-w-2xl mx-auto mb-16">
           <h2 id="how-title" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Cómo funciona en 4 pasos
+            {t("landing.how.title")}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-            De la pregunta a la decisión en segundos, sin necesidad de conocimientos técnicos de GIS o data science.
+            {t("landing.how.subtitle")}
           </p>
         </header>
 
@@ -417,8 +381,8 @@ function HowItWorks() {
                     <span className="text-3xl font-bold text-primary/20 font-mono">{step.number}</span>
                     <div className="w-16 h-px bg-border" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{step.description}</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">{t(`landing.how.${step.key}.title`)}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{t(`landing.how.${step.key}.description`)}</p>
                 </div>
                 <div className="relative shrink-0 lg:w-1/2">
                   <div
@@ -443,32 +407,40 @@ function HowItWorks() {
   );
 }
 
-function Sources() {
+function Sources({ t }: { t: (key: string) => string }) {
+  const sources = [
+    { key: "labor", icon: "check" },
+    { key: "health", icon: "check" },
+    { key: "ine", icon: "check" },
+    { key: "telecom", icon: "check" },
+    { key: "municipal", icon: "check" },
+  ];
+
   return (
     <section id="metodologia" className="py-20 sm:py-28 px-6 bg-background" aria-labelledby="sources-title">
       <div className="max-w-6xl mx-auto">
         <header className="text-center max-w-2xl mx-auto mb-12">
           <h2 id="sources-title" className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Fuentes de datos abiertos
+            {t("landing.sources.title")}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-            Todas las series son públicas, anonimizadas y actualizadas periódicamente según calendario oficial.
+            {t("landing.sources.subtitle")}
           </p>
         </header>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-          {SOURCES.map((source, index) => (
+          {sources.map((source, index) => (
             <article
-              key={source.name}
+              key={source.key}
               className="group rounded-xl border border-border/50 bg-card p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
               role="listitem"
               style={{ animationDelay: `${index * 60}ms` }}
             >
-              <h3 className="font-semibold text-foreground mb-1">{source.name}</h3>
-              <p className="text-sm text-muted-foreground">{source.desc}</p>
+              <h3 className="font-semibold text-foreground mb-1">{t(`landing.source.${source.key}`)}</h3>
+              <p className="text-sm text-muted-foreground">{t(`landing.source.${source.key}.desc`)}</p>
               <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                <Icon name="check" size={12} />
-                <span>Ver ficha técnica</span>
+                <Icon name={source.icon} size={12} />
+                <span>{t("landing.feature.methodology.detail")}</span>
               </div>
             </article>
           ))}
@@ -478,16 +450,15 @@ function Sources() {
   );
 }
 
-function CTA() {
+function CTA({ t }: { t: (key: string) => string }) {
   return (
     <section className="py-20 sm:py-28 px-6 bg-primary" aria-labelledby="cta-title">
       <div className="max-w-3xl mx-auto text-center">
         <h2 id="cta-title" className="text-3xl sm:text-4xl font-bold tracking-tight text-primary-foreground">
-          ¿Listo para explorar el territorio?
+          {t("landing.cta.title")}
         </h2>
         <p className="mt-4 text-lg text-primary-foreground/80 leading-relaxed">
-          Accede al mapa interactivo, haz tu primera consulta y descubre
-          dónde tu intervención tiene mayor impacto.
+          {t("landing.cta.description")}
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Button
@@ -497,7 +468,7 @@ function CTA() {
             onClick={() => document.getElementById("mapa")?.scrollIntoView({ behavior: "smooth" })}
           >
             <Icon name="mapa" size={18} className="mr-2" />
-            Abrir mapa inteligente
+            {t("landing.cta.primary")}
           </Button>
           <Button
             variant="outline"
@@ -505,7 +476,7 @@ function CTA() {
             className="w-full sm:w-auto h-11 px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
             onClick={() => document.getElementById("metodologia")?.scrollIntoView({ behavior: "smooth" })}
           >
-            Ver metodología completa
+            {t("landing.cta.secondary")}
             <Icon name="flecha" size={16} className="ml-2" />
           </Button>
         </div>
@@ -514,7 +485,7 @@ function CTA() {
   );
 }
 
-function Footer() {
+function Footer({ t }: { t: (key: string) => string }) {
   return (
     <footer className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" role="contentinfo">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -526,28 +497,28 @@ function Footer() {
               <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
             </svg>
           </span>
-          <span className="text-sm font-semibold text-foreground">App BiT</span>
-          <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[10px] font-medium text-primary-foreground bg-primary rounded">Panel de Datos Públicos</span>
+          <span className="text-sm font-semibold text-foreground">{t("landing.footer.brand")}</span>
+          <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[10px] font-medium text-primary-foreground bg-primary rounded">{t("landing.footer.tagline")}</span>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Icon name="escudo" size={12} />
-            Datos agregados y anonimizados
+            {t("landing.footer.privacy")}
           </span>
-          <span className="font-mono text-xs">· v1.0.0</span>
+          <span className="font-mono text-xs">{t("landing.footer.version")}</span>
         </div>
         <nav className="flex items-center gap-4 text-sm" aria-label="Enlaces de pie de página">
           <a href="/metodologia" className="text-muted-foreground hover:text-foreground transition-colors">
-            Metodología
+            {t("landing.footer.methodology")}
           </a>
           <a href="/panel" className="text-muted-foreground hover:text-foreground transition-colors">
-            Panel
+            {t("landing.footer.panel")}
           </a>
           <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-            Privacidad
+            {t("landing.footer.privacy_link")}
           </a>
           <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-            Contacto
+            {t("landing.footer.contact")}
           </a>
         </nav>
       </div>
@@ -556,6 +527,8 @@ function Footer() {
 }
 
 export default function LandingPage() {
+  const { t } = useLanguage();
+
   return (
     <>
       <style>{`
@@ -569,12 +542,12 @@ export default function LandingPage() {
           * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
       `}</style>
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Sources />
-      <CTA />
-      <Footer />
+      <Hero t={t} />
+      <Features t={t} />
+      <HowItWorks t={t} />
+      <Sources t={t} />
+      <CTA t={t} />
+      <Footer t={t} />
     </>
   );
 }
