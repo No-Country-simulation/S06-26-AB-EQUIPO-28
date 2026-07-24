@@ -2,4 +2,4 @@
 // Public API — src/pages/landing
 // ---------------------------------------------------------------------------
 
-export { LandingPage } from "./ui/LandingPage.tsx";
+export { default as LandingPage } from "./ui/LandingPage.tsx";
