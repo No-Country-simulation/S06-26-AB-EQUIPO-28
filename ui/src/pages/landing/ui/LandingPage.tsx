@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/shared/ui/Button";
+import { LandingMap } from "./LandingMap.tsx";
 import heroImage from "@/assets/hero.png";
 
 function Icon({
@@ -364,24 +365,28 @@ function HowItWorks() {
       title: "Selecciona el territorio",
       description:
         "Navega el mapa o usa el buscador para elegir una región, municipio o barrio específico.",
+      mapView: { center: [-56.16, -34.9] as [number, number], zoom: 9 },
     },
     {
       number: "02",
       title: "Consulta en lenguaje natural",
       description:
         "Escribe tu pregunta: «¿Qué zonas tienen alta vulnerabilidad y mala conectividad en horario nocturno?»",
+      mapView: { center: [-56.16, -34.9] as [number, number], zoom: 10.5 },
     },
     {
       number: "03",
       title: "Recibe respuesta fundamentada",
       description:
         "Obtén hallazgos con datos, fuentes citadas, nivel de confianza y una recomendación concreta.",
+      mapView: { center: [-56.18, -34.88] as [number, number], zoom: 11 },
     },
     {
       number: "04",
       title: "Exporta y comparte",
       description:
         "Genera PDFs para informes técnicos, comparte enlaces directos o integra vía API en tus sistemas.",
+      mapView: { center: [-56.16, -34.9] as [number, number], zoom: 9 },
     },
   ];
 
@@ -421,10 +426,11 @@ function HowItWorks() {
                       index % 2 === 0 ? "lg:ml-auto" : "lg:mr-auto"
                     }`}
                   >
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
-                      <Icon name={index % 2 === 0 ? "mapa" : "chat"} size={48} />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <LandingMap
+                      initialView={step.mapView}
+                      className="w-full h-full"
+                      interactive={false}
+                    />
                   </div>
                   <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary border-4 bg-background hidden lg:block" aria-hidden="true" />
                 </div>
