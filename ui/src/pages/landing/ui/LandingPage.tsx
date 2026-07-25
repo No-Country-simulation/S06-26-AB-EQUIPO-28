@@ -152,10 +152,10 @@ function Hero({ t }: { t: (key: string) => string }) {
       aria-labelledby="hero-title"
     >
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat "
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
         style={{ backgroundImage: "url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)" }}
       />
-      <div className="absolute inset-0 bg-linear-to-b from-background/40 via-background/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
 
 
       <div className="relative z-10 w-full max-w-6xl px-6 py-20 mx-auto">
