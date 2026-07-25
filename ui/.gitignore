@@ -46,6 +46,8 @@ knowledge/**
 openspec/**
 DESIGN.md
 PRODUCT.md
-env
+.env
+.env.development
+.env.production
 .env.development
 .claude
