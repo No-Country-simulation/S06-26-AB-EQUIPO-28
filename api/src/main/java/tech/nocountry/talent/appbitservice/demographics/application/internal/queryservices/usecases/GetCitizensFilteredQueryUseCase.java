@@ -46,7 +46,7 @@ public class GetCitizensFilteredQueryUseCase {
      * @return especificación JPA para la búsqueda
      */
     private Specification<CitizenProfile> buildSpecification(GetCitizensFilteredQuery query) {
-        return (root, _, cb) -> {
+        return (root, ignored, cb) -> {
             var predicates = new ArrayList<Predicate>();
             if (query.incomeLevel() != null) {
                 predicates.add(cb.equal(root.get("incomeLevel").get("value"), query.incomeLevel()));
