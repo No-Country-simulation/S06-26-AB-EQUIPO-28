@@ -90,6 +90,8 @@ export function PanelDemoPage() {
 
   const { regions, selectedRegionId, setSelectedRegion, selectedRegion } = useRegionFilter(regionRepository)
 
+  const [retryKey, setRetryKey] = useState(0)
+
   const { report, reportLoading, reportError, vulnerableRegions, vulnLoading, indicators } = usePanelData(
     mentalHealthRepository,
     indicatorRepository,
@@ -116,7 +118,6 @@ export function PanelDemoPage() {
     }
   }, [highConcentrationOnly])
   const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
-  const [retryKey, setRetryKey] = useState(0)
 
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
     useAskAi(aiAgentRepository, { region: selectedRegionId, language: locale, errorFallback: t("dashboard.error") })
