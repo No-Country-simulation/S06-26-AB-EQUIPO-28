@@ -429,14 +429,6 @@ export function PanelDemoPage() {
     { key: "empleabilidad", icon: Briefcase, label: t("panel.employability") },
   ]
 
-  if (reportLoading || vulnLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    )
-  }
-
   if (reportError && regions.length === 0) {
     if (isColdStartError(reportError)) {
       return (
