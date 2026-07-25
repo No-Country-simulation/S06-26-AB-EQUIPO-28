@@ -171,9 +171,8 @@ function Hero({ t }: { t: (key: string) => string }) {
           <h1
             id="hero-title"
             className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]"
-          >
-            {t("landing.hero.title")}
-          </h1>
+            dangerouslySetInnerHTML={{ __html: t("landing.hero.title") }}
+          />
 
           <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
             {t("landing.hero.description")}
