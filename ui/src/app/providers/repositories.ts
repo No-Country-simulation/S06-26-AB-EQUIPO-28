@@ -134,13 +134,14 @@ export const regionRepository: RegionRepository = {
 // ---------------------------------------------------------------------------
 
 export const aiAgentRepository: AiAgentRepository = {
-  async askQuery(query) {
+  async askQuery(query, signal) {
     const requestBody = toAskAiRequest(query);
 
     const res = await fetch("/api/v1/data/query", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
+      signal,
     });
 
     if (!res.ok) throw new Error(`AI query failed (${res.status})`);

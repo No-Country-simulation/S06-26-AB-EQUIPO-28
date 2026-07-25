@@ -34,7 +34,7 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  if (location.pathname.startsWith("/panel")) return null;
+  if (location.pathname.startsWith("/mapa") || location.pathname.startsWith("/panel")) return null;
 
   return (
     <nav

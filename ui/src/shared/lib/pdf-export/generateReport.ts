@@ -41,9 +41,8 @@ function formatNumber(n: number, locale: string): string {
 
 export async function generatePdfReport(data: ReportData): Promise<void> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  // Extend doc with autoTable at runtime
-  const docWithAutoTable = doc as any;
-  docWithAutoTable.autoTable = autoTable;
+  // Keep a "any" reference for lastAutoTable access (plugin populates this)
+  const d = doc as any;
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -147,33 +146,33 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
   };
 
   // ── 1. HEADER ───────────────────────────────────────────────
-  docWithAutoTable.setFontSize(18);
-  docWithAutoTable.setFont("helvetica", "bold");
-  docWithAutoTable.setTextColor(29, 78, 216);
-  docWithAutoTable.text("Panel BiT", margin, y);
+  d.setFontSize(18);
+  d.setFont("helvetica", "bold");
+  d.setTextColor(29, 78, 216);
+  d.text("Panel BiT", margin, y);
   y += 7;
 
-  docWithAutoTable.setFontSize(14);
-  docWithAutoTable.setFont("helvetica", "normal");
-  docWithAutoTable.setTextColor(55, 65, 81);
-  docWithAutoTable.text(isPt ? "Relatório Territorial" : "Reporte Territorial", margin, y);
+  d.setFontSize(14);
+  d.setFont("helvetica", "normal");
+  d.setTextColor(55, 65, 81);
+  d.text(isPt ? "Relatório Territorial" : "Reporte Territorial", margin, y);
   y += 10;
 
-  docWithAutoTable.setFontSize(9);
-  docWithAutoTable.setFont("helvetica", "normal");
-  docWithAutoTable.setTextColor(107, 114, 128);
+  d.setFontSize(9);
+  d.setFont("helvetica", "normal");
+  d.setTextColor(107, 114, 128);
 
   const periodLabel = isPt ? "Período" : "Período";
   const regionName = data.region?.name ?? (isPt ? "Todas as regiões" : "Todas las regiones");
-  docWithAutoTable.text(`${periodLabel}: ${data.period}`, margin, y);
+  d.text(`${periodLabel}: ${data.period}`, margin, y);
   y += 5;
-  docWithAutoTable.text(`${isPt ? "Região" : "Región"}: ${regionName}`, margin, y);
+  d.text(`${isPt ? "Região" : "Región"}: ${regionName}`, margin, y);
   y += 5;
-  docWithAutoTable.text(`Fuente: Vísent CDRView · Anatel · IBGE`, margin, y);
+  d.text(`Fuente: Vísent CDRView · Anatel · IBGE`, margin, y);
   y += 10;
 
-  docWithAutoTable.setDrawColor(229, 231, 235);
-  docWithAutoTable.line(margin, y, docWithAutoTable.internal.pageSize.getWidth() - margin, y);
+  d.setDrawColor(229, 231, 235);
+  d.line(margin, y, d.internal.pageSize.getWidth() - margin, y);
   y += 8;
 
   // ── 2. RISK SUMMARY TABLE ──────────────────────────────────
@@ -191,48 +190,48 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
     const total = counts[highLabel] + counts[mediumLabel] + counts[lowLabel];
 
     return [
-      [{ content: isPt ? "Nível de risco" : "Nivel de riesgo", styles: { fontStyle: "bold" } },
-       { content: isPt ? "Quantidade de zonas" : "Cantidad de zonas", styles: { fontStyle: "bold", halign: "right" } }],
+      [{ content: isPt ? "Nível de risco" : "Nivel de riesgo", styles: { fontStyle: "bold" as const } },
+       { content: isPt ? "Quantidade de zonas" : "Cantidad de zonas", styles: { fontStyle: "bold" as const, halign: "right" as const } }],
       [highLabel, String(counts[highLabel])],
       [mediumLabel, String(counts[mediumLabel])],
       [lowLabel, String(counts[lowLabel])],
-      [{ content: isPt ? "Total" : "Total", styles: { fontStyle: "bold" } },
-       { content: String(total), styles: { fontStyle: "bold", halign: "right" } }],
+      [{ content: isPt ? "Total" : "Total", styles: { fontStyle: "bold" as const } },
+       { content: String(total), styles: { fontStyle: "bold" as const, halign: "right" as const } }],
     ];
   };
 
   const riskSummary = buildRiskSummary();
-  docWithAutoTable.autoTable({
+  autoTable(d, {
     startY: y,
     margin: { left: margin, right: margin },
     tableWidth: "wrap",
     theme: "striped",
     headStyles: { fillColor: [29, 78, 216], textColor: 255, fontSize: 9 },
     bodyStyles: { fontSize: 9, cellPadding: 4 },
-    columnStyles: { 0: { fontStyle: "bold" }, 1: { halign: "right" } },
+    columnStyles: { 0: { fontStyle: "bold" as const }, 1: { halign: "right" as const } },
     body: riskSummary.slice(1),
     head: [riskSummary[0]],
   });
 
-  y = docWithAutoTable.lastAutoTable.finalY + 8;
+  y = d.lastAutoTable.finalY + 8;
 
   // ── 3. DETAILED REGIONS TABLE ───────────────────────────────
-  if (y > docWithAutoTable.internal.pageSize.getHeight() - 60) {
-    docWithAutoTable.addPage();
+  if (y > d.internal.pageSize.getHeight() - 60) {
+    d.addPage();
     y = margin;
   }
 
-  docWithAutoTable.setFontSize(13);
-  docWithAutoTable.setFont("helvetica", "bold");
-  docWithAutoTable.setTextColor(17, 24, 39);
+  d.setFontSize(13);
+  d.setFont("helvetica", "bold");
+  d.setTextColor(17, 24, 39);
   const detailTitle = isPt ? "Detalhe de zonas" : "Detalle de zonas";
-  docWithAutoTable.text(detailTitle, margin, y);
+  d.text(detailTitle, margin, y);
   y += 8;
 
   const rows = buildRegionsTableRows();
   const displayRows = rows.slice(0, 100);
 
-  docWithAutoTable.autoTable({
+  autoTable(d, {
     startY: y,
     margin: { left: margin, right: margin },
     tableWidth: "auto",
@@ -274,15 +273,15 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
       return str.length > 18 ? str.slice(0, 17) + "…" : str;
     })),
     didDrawPage: (data: any) => {
-      const pageCount = docWithAutoTable.getNumberOfPages();
+      const pageCount = d.getNumberOfPages();
       const currentPage = data.pageNumber;
-      docWithAutoTable.setFontSize(7);
-      docWithAutoTable.setFont("helvetica", "normal");
-      docWithAutoTable.setTextColor(156, 163, 175);
-      docWithAutoTable.text(
+      d.setFontSize(7);
+      d.setFont("helvetica", "normal");
+      d.setTextColor(156, 163, 175);
+      d.text(
         `Fuente: Vísent CDRView · Anatel · IBGE  |  ${isPt ? "Página" : "Página"} ${currentPage} de ${pageCount}`,
-        docWithAutoTable.internal.pageSize.getWidth() / 2,
-        docWithAutoTable.internal.pageSize.getHeight() - 8,
+        d.internal.pageSize.getWidth() / 2,
+        d.internal.pageSize.getHeight() - 8,
         { align: "center" }
       );
     },
@@ -290,16 +289,16 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
 
   // ── 4. INDICATORS SECTION (if any) ─────────────────────────
   if (data.indicators.length > 0) {
-    y = docWithAutoTable.lastAutoTable.finalY + 10;
-    if (y > docWithAutoTable.internal.pageSize.getHeight() - 60) {
-      docWithAutoTable.addPage();
+    y = d.lastAutoTable.finalY + 10;
+    if (y > d.internal.pageSize.getHeight() - 60) {
+      d.addPage();
       y = margin;
     }
 
-    docWithAutoTable.setFontSize(13);
-    docWithAutoTable.setFont("helvetica", "bold");
-    docWithAutoTable.setTextColor(17, 24, 39);
-    docWithAutoTable.text(isPt ? "Indicadores" : "Indicadores", margin, y);
+    d.setFontSize(13);
+    d.setFont("helvetica", "bold");
+    d.setTextColor(17, 24, 39);
+    d.text(isPt ? "Indicadores" : "Indicadores", margin, y);
     y += 8;
 
     const indRows = data.indicators.map((ind) => {
@@ -316,7 +315,7 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
       ];
     });
 
-    docWithAutoTable.autoTable({
+    autoTable(d, {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "striped",
@@ -329,30 +328,30 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
 
   // ── 5. AI RESPONSE (if any) ────────────────────────────────
   if (data.aiResponse) {
-    y = docWithAutoTable.lastAutoTable?.finalY ?? y;
+    y = d.lastAutoTable?.finalY ?? y;
     y += 10;
-    if (y > docWithAutoTable.internal.pageSize.getHeight() - 60) {
-      docWithAutoTable.addPage();
+    if (y > d.internal.pageSize.getHeight() - 60) {
+      d.addPage();
       y = margin;
     }
 
-    docWithAutoTable.setFontSize(13);
-    docWithAutoTable.setFont("helvetica", "bold");
-    docWithAutoTable.setTextColor(17, 24, 39);
-    docWithAutoTable.text("Análise IA", margin, y);
+    d.setFontSize(13);
+    d.setFont("helvetica", "bold");
+    d.setTextColor(17, 24, 39);
+    d.text("Análise IA", margin, y);
     y += 8;
 
-    docWithAutoTable.setFontSize(9);
-    docWithAutoTable.setFont("helvetica", "normal");
-    docWithAutoTable.setTextColor(55, 65, 81);
+    d.setFontSize(9);
+    d.setFont("helvetica", "normal");
+    d.setTextColor(55, 65, 81);
 
-    const lines = docWithAutoTable.splitTextToSize(data.aiResponse.summary, contentWidth);
+    const lines = d.splitTextToSize(data.aiResponse.summary, contentWidth);
     for (const line of lines) {
-      if (y > docWithAutoTable.internal.pageSize.getHeight() - 30) {
-        docWithAutoTable.addPage();
+      if (y > d.internal.pageSize.getHeight() - 30) {
+        d.addPage();
         y = margin;
       }
-      docWithAutoTable.text(line, margin, y);
+      d.text(line, margin, y);
       y += 5;
     }
     y += 4;
@@ -360,7 +359,7 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
     // AI data table
     if (data.aiResponse.data.length > 0) {
       const aiRows = data.aiResponse.data.map((d) => [d.region, String(d.value), d.source]);
-      docWithAutoTable.autoTable({
+      autoTable(d, {
         startY: y,
         margin: { left: margin, right: margin },
         theme: "striped",
@@ -373,41 +372,41 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
 
     // Sources
     if (data.aiResponse.sources.length > 0) {
-      y = docWithAutoTable.lastAutoTable.finalY + 6;
-      docWithAutoTable.setFontSize(10);
-      docWithAutoTable.setFont("helvetica", "bold");
-      docWithAutoTable.setTextColor(17, 24, 39);
-      docWithAutoTable.text(isPt ? "Fontes" : "Fuentes", margin, y);
+      y = d.lastAutoTable.finalY + 6;
+      d.setFontSize(10);
+      d.setFont("helvetica", "bold");
+      d.setTextColor(17, 24, 39);
+      d.text(isPt ? "Fontes" : "Fuentes", margin, y);
       y += 6;
 
-      docWithAutoTable.setFontSize(8);
-      docWithAutoTable.setFont("helvetica", "normal");
-      docWithAutoTable.setTextColor(107, 114, 128);
+      d.setFontSize(8);
+      d.setFont("helvetica", "normal");
+      d.setTextColor(107, 114, 128);
       for (const src of data.aiResponse.sources) {
-        if (y > docWithAutoTable.internal.pageSize.getHeight() - 20) {
-          docWithAutoTable.addPage();
+        if (y > d.internal.pageSize.getHeight() - 20) {
+          d.addPage();
           y = margin;
         }
-        docWithAutoTable.text(`- ${src}`, margin, y);
+        d.text(`- ${src}`, margin, y);
         y += 5;
       }
     }
   }
 
   // ── Final footer on all pages ──────────────────────────────
-  const pageCount = docWithAutoTable.getNumberOfPages();
+  const pageCount = d.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
-    docWithAutoTable.setPage(i);
-    docWithAutoTable.setFontSize(7);
-    docWithAutoTable.setFont("helvetica", "normal");
-    docWithAutoTable.setTextColor(156, 163, 175);
-    docWithAutoTable.text(
+    d.setPage(i);
+    d.setFontSize(7);
+    d.setFont("helvetica", "normal");
+    d.setTextColor(156, 163, 175);
+    d.text(
       `Fuente: Vísent CDRView · Anatel · IBGE  |  ${isPt ? "Página" : "Página"} ${i} de ${pageCount}`,
-      docWithAutoTable.internal.pageSize.getWidth() / 2,
-      docWithAutoTable.internal.pageSize.getHeight() - 8,
+      d.internal.pageSize.getWidth() / 2,
+      d.internal.pageSize.getHeight() - 8,
       { align: "center" }
     );
   }
 
-  docWithAutoTable.save(`appbit-reporte-territorial-${Date.now()}.pdf`);
+  d.save(`appbit-reporte-territorial-${Date.now()}.pdf`);
 }

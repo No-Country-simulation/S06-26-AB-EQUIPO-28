@@ -126,8 +126,32 @@ export function PanelDemoPage() {
   const [showZonesList, setShowZonesList] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState("")
   const loadingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
+  const { query, setQuery, submit, cancel: cancelAiQuery, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
     useAskAi(aiAgentRepository, { region: selectedRegionId, language: locale, errorFallback: t("dashboard.error") })
+
+  // Cycling loading messages while AI processes the query
+  const [aiLoadingMessage, setAiLoadingMessage] = useState("")
+  useEffect(() => {
+    if (!aiLoading) {
+      setAiLoadingMessage("")
+      return
+    }
+    const messages = [
+      t("panel.queryLoading1"),
+      t("panel.queryLoading2"),
+      t("panel.queryLoading3"),
+      t("panel.queryLoading4"),
+      t("panel.queryLoading5"),
+      t("panel.queryLoading6"),
+    ]
+    let idx = 0
+    setAiLoadingMessage(messages[0])
+    const timer = setInterval(() => {
+      idx = (idx + 1) % messages.length
+      setAiLoadingMessage(messages[idx])
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [aiLoading, t])
 
   const { unacknowledgedCount } = useAlertMonitor(indicators, selectedRegionId, selectedRegion?.name)
 
@@ -694,6 +718,8 @@ export function PanelDemoPage() {
                 onConsultaChange={setQuery}
                 onSubmit={handleAiSubmit}
                 loading={aiLoading}
+                loadingMessage={aiLoadingMessage}
+                onCancel={cancelAiQuery}
                 error={aiError}
                 response={aiPanelResponse}
                 pregunta={lastQuestion}

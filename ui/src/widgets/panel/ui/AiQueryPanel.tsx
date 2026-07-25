@@ -1,4 +1,4 @@
-import { Sparkles, ArrowUp, FileText, RotateCcw } from "lucide-react"
+import { Sparkles, ArrowUp, FileText, RotateCcw, XCircle } from "lucide-react"
 import { Card } from "@/shared/ui"
 import { Badge } from "@/shared/ui"
 import { Button } from "@/shared/ui"
@@ -24,6 +24,8 @@ interface AiQueryPanelProps {
   onConsultaChange: (value: string) => void
   onSubmit: () => void
   loading?: boolean
+  loadingMessage?: string
+  onCancel?: () => void
   error?: string | null
   response?: AiQueryResponse | null
   pregunta?: string
@@ -52,6 +54,8 @@ export function AiQueryPanel({
   onConsultaChange,
   onSubmit,
   loading = false,
+  loadingMessage,
+  onCancel,
   error,
   response,
   pregunta,
@@ -105,6 +109,26 @@ export function AiQueryPanel({
           )}
         </Button>
       </div>
+
+      {loading && loadingMessage && (
+        <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2 text-xs text-primary">
+          <svg className="h-3.5 w-3.5 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+          <span className="flex-1">{loadingMessage}</span>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XCircle className="h-3 w-3" />
+              {t("panel.queryCancel")}
+            </button>
+          )}
+        </div>
+      )}
 
       {!response && !loading && sugerencias.length > 0 && (
         <div className="flex flex-wrap gap-2">

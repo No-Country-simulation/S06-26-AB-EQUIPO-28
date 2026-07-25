@@ -18,6 +18,8 @@ export function useAskAi(
     language?: string;
     /** Localized message shown when the request fails without a message. */
     errorFallback?: string;
+    /** Request timeout in ms (default 90000). */
+    timeoutMs?: number;
   },
 ) {
   const [query, setQuery] = useState(() => {
@@ -45,37 +47,72 @@ export function useAskAi(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isLoadingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Cleanup on unmount — abort any in-flight request
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const submit = useCallback(async () => {
     const trimmed = query.trim();
     if (!trimmed) return;
     if (isLoadingRef.current) return; // prevent double-submit while in-flight
 
+    // Abort previous request if still in-flight
+    abortRef.current?.abort();
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+
     isLoadingRef.current = true;
     setIsLoading(true);
     setError(null);
 
+    // Timeout
+    const timeoutMs = options?.timeoutMs ?? 90000;
+    const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
+
     try {
-      const result = await repository.askQuery({
-        question: trimmed,
-        indicator: options?.indicator ?? undefined,
-        region: options?.region ?? undefined,
-        language: options?.language,
-      });
+      const result = await repository.askQuery(
+        {
+          question: trimmed,
+          indicator: options?.indicator ?? undefined,
+          region: options?.region ?? undefined,
+          language: options?.language,
+        },
+        abortController.signal,
+      );
+
+      if (abortController.signal.aborted) return; // already aborted, disregard
+
       setResponse(result);
       setLastQuestion(trimmed);
       setQuery("");
     } catch (err) {
+      if (abortController.signal.aborted) {
+        // Don't set error for aborted/timeout requests — the user cancelled
+        return;
+      }
       const message =
         err instanceof Error
           ? err.message
           : (options?.errorFallback ?? "Ocurrió un error al procesar la consulta.");
       setError(message);
     } finally {
+      clearTimeout(timeoutId);
+      if (abortRef.current === abortController) {
+        abortRef.current = null;
+      }
       setIsLoading(false);
       isLoadingRef.current = false;
     }
-  }, [query, repository, options?.region, options?.indicator, options?.language, options?.errorFallback]);
+  }, [query, repository, options?.region, options?.indicator, options?.language, options?.errorFallback, options?.timeoutMs]);
+
+  const cancel = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
 
   const clearResponse = useCallback(() => {
     setResponse(null);
@@ -133,6 +170,7 @@ export function useAskAi(
     query,
     setQuery,
     submit,
+    cancel,
     response,
     lastQuestion,
     isLoading,
