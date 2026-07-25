@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/Button";
 import { LandingMap } from "./LandingMap.tsx";
-import heroImage from "@/assets/hero.png";
+import { Activity } from "lucide-react";
+
 
 function Icon({
   name,
@@ -126,13 +127,7 @@ function Icon({
   }
 }
 
-const ETIQUETAS = [
-  { nombre: "Centro", x: 61.5, y: 22.5 },
-  { nombre: "Norte", x: 76.5, y: 29 },
-  { nombre: "Sur", x: 90.0, y: 47 },
-  { nombre: "Este", x: 54.5, y: 54 },
-  { nombre: "Oeste", x: 79.0, y: 66.5 },
-];
+
 
 const FEATURES = [
   { icon: "grafico", key: "diagnosis" },
@@ -154,26 +149,14 @@ function Hero({ t }: { t: (key: string) => string }) {
   return (
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background"
-      style={{ backgroundImage: `url(${heroImage})`, backgroundSize: "cover", backgroundPosition: "center 35%" }}
       aria-labelledby="hero-title"
     >
-      <div className="absolute inset-0 bg-background/90" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,var(--background)_100%)]" />
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat "
+        style={{ backgroundImage: "url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)" }}
+      />
+      <div className="absolute inset-0 bg-linear-to-b from-background/40 via-background/60 to-background" />
 
-      {/* Map labels on desktop - like equipo 69 */}
-      <div className="hidden lg:block absolute inset-0 pointer-events-none">
-        {ETIQUETAS.map((e) => (
-          <span
-            key={e.nombre}
-            className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[12.5px] font-semibold text-foreground"
-            style={{
-              left: `${e.x}%`,
-              top: `${e.y}%`,
-              textShadow: "0 0 6px rgba(255,255,255,0.9), 0 1px 3px rgba(255,255,255,0.85), 0 0 14px rgba(255,255,255,0.7)",
-            }}
-          >{e.nombre}</span>
-        ))}
-      </div>
 
       <div className="relative z-10 w-full max-w-6xl px-6 py-20 mx-auto">
         <div
@@ -181,10 +164,6 @@ function Hero({ t }: { t: (key: string) => string }) {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
-            <Icon name="escudo" size={14} />
-            {t("landing.hero.badge")}
-          </span>
 
           <h1
             id="hero-title"
@@ -433,7 +412,7 @@ function CTA({ t }: { t: (key: string) => string }) {
             variant="secondary"
             size="lg"
             className="w-full sm:w-auto h-11 px-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            onClick={() => document.getElementById("mapa")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => document.getElementById("/panel")?.scrollIntoView({ behavior: "smooth" })}
           >
             <Icon name="mapa" size={18} className="mr-2" />
             {t("landing.cta.primary")}
@@ -441,7 +420,7 @@ function CTA({ t }: { t: (key: string) => string }) {
           <Button
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto h-11 px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+            className="w-full sm:w-auto h-11 px-8"
             onClick={() => document.getElementById("metodologia")?.scrollIntoView({ behavior: "smooth" })}
           >
             {t("landing.cta.secondary")}
@@ -455,15 +434,11 @@ function CTA({ t }: { t: (key: string) => string }) {
 
 function Footer({ t }: { t: (key: string) => string }) {
   return (
-    <footer className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" role="contentinfo">
+    <footer className="border-t border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80" role="contentinfo">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-semibold font-mono text-sm" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
-              <path d="M12 6v6l4 2" />
-              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
-            </svg>
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground" aria-hidden="true">
+            <Activity className="h-4 w-4" />
           </span>
           <span className="text-sm font-semibold text-foreground">{t("landing.footer.brand")}</span>
           <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[10px] font-medium text-primary-foreground bg-primary rounded">{t("landing.footer.tagline")}</span>
@@ -479,8 +454,8 @@ function Footer({ t }: { t: (key: string) => string }) {
           <a href="/metodologia" className="text-muted-foreground hover:text-foreground transition-colors">
             {t("landing.footer.methodology")}
           </a>
-          <a href="/panel" className="text-muted-foreground hover:text-foreground transition-colors">
-            {t("landing.footer.panel")}
+          <a href="/mapa" className="text-muted-foreground hover:text-foreground transition-colors">
+            {t("landing.footer.map")}
           </a>
           <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
             {t("landing.footer.privacy_link")}

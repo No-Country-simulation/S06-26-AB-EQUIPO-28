@@ -1,12 +1,4 @@
-// ---------------------------------------------------------------------------
-// useMentorshipData — Data-fetching orchestration for the Mentorship section.
-//
-// Loads programs, per-cluster coverage gaps, and cluster summaries from the
-// mentorship repository. Mirrors the usePanelData pattern: useState + useEffect
-// with defensive error handling (no TanStack Query).
-// ---------------------------------------------------------------------------
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type {
   MentorshipRepository,
   MentorshipProgram,
@@ -22,68 +14,73 @@ export interface MentorshipData {
   readonly error: string | null;
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 2000;
+
+async function withRetry<T>(fn: () => Promise<T>, retries: number = MAX_RETRIES): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export function useMentorshipData(
   mentorshipRepository: MentorshipRepository,
   errorFallback: string,
   retryKey: number = 0,
-  delay: number = 2000,
 ): MentorshipData {
   const [programs, setPrograms] = useState<readonly MentorshipProgram[]>([]);
   const [gaps, setGaps] = useState<readonly MentorshipGap[]>([]);
   const [clusters, setClusters] = useState<readonly MentorshipClusterSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | null = null;
 
     async function load() {
       setLoading(true);
       setError(null);
-      let failed = false;
+
       try {
-        const data = await mentorshipRepository.getPrograms();
-        if (!cancelled) setPrograms(data);
+        const [programsData, gapsData, clustersData] = await Promise.all([
+          withRetry(() => mentorshipRepository.getPrograms()),
+          withRetry(() => mentorshipRepository.getGaps()),
+          withRetry(() => mentorshipRepository.getClusters()),
+        ]);
+        if (!cancelled) {
+          setPrograms(programsData);
+          setGaps(gapsData);
+          setClusters(clustersData);
+        }
       } catch {
         if (!cancelled) {
           setPrograms([]);
-          failed = true;
-        }
-      }
-      try {
-        const data = await mentorshipRepository.getGaps();
-        if (!cancelled) setGaps(data);
-      } catch {
-        if (!cancelled) {
           setGaps([]);
-          failed = true;
-        }
-      }
-      try {
-        const data = await mentorshipRepository.getClusters();
-        if (!cancelled) setClusters(data);
-      } catch {
-        if (!cancelled) {
           setClusters([]);
-          failed = true;
+          setError(errorFallback);
         }
-      }
-      if (!cancelled) {
-        if (failed) setError(errorFallback);
-        setLoading(false);
+      } finally {
+        if (!cancelled) setLoading(false);
+        fetchingRef.current = false;
       }
     }
 
-    timer = setTimeout(() => {
-      if (!cancelled) load();
-    }, delay);
-
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [mentorshipRepository, errorFallback, retryKey, delay]);
+    load();
+    return () => { cancelled = true; fetchingRef.current = false; };
+  }, [mentorshipRepository, errorFallback, retryKey]);
 
   return { programs, gaps, clusters, loading, error };
 }

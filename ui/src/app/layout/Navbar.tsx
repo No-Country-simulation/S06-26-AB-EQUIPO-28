@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useLanguage, LOCALES } from "@/shared/lib/i18n";
 import type { Locale } from "@/shared/lib/i18n";
-import { AlertHistoryPanel } from "@/features/alert-monitor";
-import type { AlertEvent } from "@/entities/alert";
-import { alertRepository } from "@/entities/alert/api/localStorageRepository.ts";
+import { Activity } from "lucide-react";
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return `inline-flex items-center h-16 px-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
@@ -19,22 +17,10 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [unacknowledged, setUnacknowledged] = useState(() => {
-    return alertRepository.getHistory().filter((e: AlertEvent) => !e.acknowledged).length;
-  });
 
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const count = alertRepository.getHistory().filter((e: AlertEvent) => !e.acknowledged).length;
-      setUnacknowledged(count);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,7 +42,10 @@ export function Navbar() {
       aria-label={t("nav.menuLabel")}
     >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-20 max-md:px-8">
-        <NavLink to="/panel" className="text-xl font-bold tracking-tight text-foreground shrink-0">
+        <NavLink to="/panel" className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Activity className="h-4 w-4" />
+          </div>
           {t("nav.brand")}
         </NavLink>
 
@@ -108,30 +97,8 @@ export function Navbar() {
               </button>
             ))}
           </div>
-
-          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border max-md:ml-0 max-md:pl-0 max-md:border-l-0 max-md:px-6 max-md:py-2 max-md:w-full max-md:justify-start">
-            <button
-              type="button"
-              className="relative inline-flex items-center justify-center w-9 h-9 border-none bg-transparent text-muted-foreground rounded-lg cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
-              onClick={() => setHistoryOpen(true)}
-              aria-label={t("alert.bellLabel")}
-              title={t("alert.history")}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unacknowledged > 0 && (
-                <span className="absolute top-0.5 right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-bold leading-4 text-center rounded-full pointer-events-none">
-                  {unacknowledged > 9 ? "9+" : unacknowledged}
-                </span>
-              )}
-            </button>
-          </div>
         </div>
       </div>
-
-      <AlertHistoryPanel open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </nav>
   );
 }

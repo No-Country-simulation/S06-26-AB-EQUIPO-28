@@ -1,4 +1,4 @@
-import { Activity, Globe, Languages } from "lucide-react"
+import { Activity, Languages } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -34,9 +34,6 @@ interface PanelHeaderProps {
 export function PanelHeader({
   title,
   subtitle,
-  regions,
-  selectedRegionId,
-  onRegionChange,
   locale,
   onLocaleChange,
   children,
@@ -57,23 +54,7 @@ export function PanelHeader({
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Select
-            items={regions.map((r) => ({ value: r.id, label: r.label }))}
-            value={selectedRegionId}
-            onValueChange={(v) => v && onRegionChange(v)}
-          >
-            <SelectTrigger className="w-37.5 sm:w-52.5" aria-label={t("panel.region")}>
-              <Globe className="h-4 w-4 shrink-0 text-primary" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {regions.map((r) => (
-                <SelectItem key={r.id} value={r.id}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
 
           {locale && onLocaleChange && (
             <Select

@@ -1,12 +1,4 @@
-// ---------------------------------------------------------------------------
-// useEmployabilityData — Data-fetching orchestration for the Employability section.
-//
-// Loads the OD mobility matrix, aggregated travel times, and per-cluster
-// employability gaps. Mirrors the usePanelData pattern: useState + useEffect
-// with defensive error handling (no TanStack Query).
-// ---------------------------------------------------------------------------
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type {
   EmployabilityRepository,
   MobilityODPair,
@@ -22,68 +14,73 @@ export interface EmployabilityData {
   readonly error: string | null;
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 2000;
+
+async function withRetry<T>(fn: () => Promise<T>, retries: number = MAX_RETRIES): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export function useEmployabilityData(
   employabilityRepository: EmployabilityRepository,
   errorFallback: string,
   retryKey: number = 0,
-  delay: number = 4000,
 ): EmployabilityData {
   const [odMatrix, setOdMatrix] = useState<readonly MobilityODPair[]>([]);
   const [travelTimes, setTravelTimes] = useState<readonly TravelTime[]>([]);
   const [gaps, setGaps] = useState<readonly EmployabilityGap[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | null = null;
 
     async function load() {
       setLoading(true);
       setError(null);
-      let failed = false;
+
       try {
-        const data = await employabilityRepository.getOdMatrix();
-        if (!cancelled) setOdMatrix(data);
+        const [odData, travelData, gapsData] = await Promise.all([
+          withRetry(() => employabilityRepository.getOdMatrix()),
+          withRetry(() => employabilityRepository.getTravelTimes()),
+          withRetry(() => employabilityRepository.getGaps()),
+        ]);
+        if (!cancelled) {
+          setOdMatrix(odData);
+          setTravelTimes(travelData);
+          setGaps(gapsData);
+        }
       } catch {
         if (!cancelled) {
           setOdMatrix([]);
-          failed = true;
-        }
-      }
-      try {
-        const data = await employabilityRepository.getTravelTimes();
-        if (!cancelled) setTravelTimes(data);
-      } catch {
-        if (!cancelled) {
           setTravelTimes([]);
-          failed = true;
-        }
-      }
-      try {
-        const data = await employabilityRepository.getGaps();
-        if (!cancelled) setGaps(data);
-      } catch {
-        if (!cancelled) {
           setGaps([]);
-          failed = true;
+          setError(errorFallback);
         }
-      }
-      if (!cancelled) {
-        if (failed) setError(errorFallback);
-        setLoading(false);
+      } finally {
+        if (!cancelled) setLoading(false);
+        fetchingRef.current = false;
       }
     }
 
-    timer = setTimeout(() => {
-      if (!cancelled) load();
-    }, delay);
-
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [employabilityRepository, errorFallback, retryKey, delay]);
+    load();
+    return () => { cancelled = true; fetchingRef.current = false; };
+  }, [employabilityRepository, errorFallback, retryKey]);
 
   return { odMatrix, travelTimes, gaps, loading, error };
 }

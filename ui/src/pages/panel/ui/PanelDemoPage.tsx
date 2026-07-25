@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo, useEffect, useRef, startTransition } fr
 import {
   useLanguage,
   formatLocaleNumber,
-  formatLocaleDate,
   type Locale,
   type TranslationKey,
 } from "@/shared/lib/i18n"
@@ -13,17 +12,23 @@ import { useRegionFilter } from "@/features/filter-by-region"
 import { useAskAi } from "@/features/ask-ai-query"
 import { useAlertMonitor, AlertHistoryPanel } from "@/features/alert-monitor"
 import { useExportPdf } from "@/shared/lib/pdf-export"
-import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPanel, MentorshipGapsPanel, MentorshipProgramsPanel, EmployabilityGapsPanel, EmployabilityOdMatrixPanel } from "@/widgets/panel"
+import { Comparativo, AiQueryPanel, MentorshipGapsPanel, MentorshipProgramsPanel, EmployabilityGapsPanel, EmployabilityOdMatrixPanel, FloatingAntennaCard } from "@/widgets/panel"
 import { InteractiveMapWidget } from "@/widgets/interactive-map"
 import type { RegionPoint } from "@/widgets/interactive-map"
 import { Card, Spinner, BackendWakingUp, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
-import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, LayoutDashboard, Check, Search, X } from "lucide-react"
+import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, Check, Search, X, Activity, Globe, Languages, ChevronDown } from "lucide-react"
 import { type Period, PERIOD_TRANSLATION_KEY } from "../model/filter-bar-types.ts"
 import { usePanelData } from "../model/usePanelData.ts"
 import { useMentorshipData } from "../model/useMentorshipData.ts"
 import { useEmployabilityData } from "../model/useEmployabilityData.ts"
 
-type Section = "dashboard" | "mapa" | "consulta" | "comparativo" | "mentorias" | "empleabilidad"
+const LANGUAGE_OPTIONS = [
+  { value: "es", label: "Español" },
+  { value: "pt", label: "Português" },
+  { value: "en", label: "English" },
+]
+
+type Section =  "mapa" | "consulta" | "comparativo" | "mentorias" | "empleabilidad"
 type Vista = "vulnerabilidad" | "conectividad"
 
 function vulnerabilityLevelToBrecha(level: string, t: (key: TranslationKey) => string): string {
@@ -68,22 +73,6 @@ function isColdStartError(error: string | null): boolean {
   );
 }
 
-function SidebarItem({ icon: Icon, label, active, onClick }: { icon: React.ComponentType<{ className?: string }>; label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-        active
-          ? "bg-primary/10 text-primary"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      }`}
-    >
-      <Icon className="h-4 w-4 shrink-0" />
-      {label}
-    </button>
-  )
-}
-
 export function PanelDemoPage() {
   const { locale, setLocale, t } = useLanguage()
   const { regionRepository, aiAgentRepository, indicatorRepository, mentalHealthRepository, mobilityDataRepository, mentorshipRepository, employabilityRepository } = useAppContext()
@@ -92,7 +81,7 @@ export function PanelDemoPage() {
 
   const [retryKey, setRetryKey] = useState(0)
 
-  const { report, reportLoading, reportError, vulnerableRegions, vulnLoading, indicators } = usePanelData(
+  const { report, reportError, vulnerableRegions, indicators } = usePanelData(
     mentalHealthRepository,
     indicatorRepository,
     selectedRegionId,
@@ -105,7 +94,7 @@ export function PanelDemoPage() {
 
   const [selectedZoneName, setSelectedZoneName] = useState<string | null>(null)
   const [vista, setVista] = useState<Vista>("vulnerabilidad")
-  const [section, setSection] = useState<Section>("dashboard")
+  const [section, setSection] = useState<Section>("mapa")
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("morning")
   const [showAntennas, setShowAntennas] = useState(true)
@@ -130,12 +119,11 @@ export function PanelDemoPage() {
   }, [report?.regionSummaries])
   const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
   const [selectedComparativeRegions, setSelectedComparativeRegions] = useState<string[]>([])
-  const [compareQuery, setCompareQuery] = useState("")
   const [compareSearch, setCompareSearch] = useState("")
   const [compareLoadingState, setCompareLoadingState] = useState(false)
   const [compareErrorState, setCompareErrorState] = useState<string | null>(null)
   const [compareResponseState, setCompareResponseState] = useState<ReturnType<typeof useAskAi>["response"] | null>(null)
-  const [compareLastQuestionState, setCompareLastQuestionState] = useState("")
+  const [showZonesList, setShowZonesList] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState("")
   const loadingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
@@ -177,14 +165,7 @@ export function PanelDemoPage() {
     [t],
   )
 
-  const kpiItems = report
-    ? [
-        { label: t("panel.kpi.totalPopulation"), value: formatLocaleNumber(report.metadata.totalPopulation, locale), tone: "text-primary" } as const,
-        { label: t("panel.kpi.vulnerabilityScore"), value: report.metadata.averageVulnerabilityScore.toFixed(1), tone: "text-primary" } as const,
-        { label: t("panel.kpi.vulnerablePopulation"), value: formatLocaleNumber(report.metadata.totalVulnerablePopulation, locale), tone: "text-[color:var(--alert)]" } as const,
-        { label: t("panel.kpi.priorityRegions"), value: String(report.metadata.priorityRegionCount), tone: "text-[color:var(--alert)]" } as const,
-      ]
-    : []
+
 
   const mapPoints = useMemo(() => {
     if (vulnerableRegions.length > 0) {
@@ -360,10 +341,8 @@ export function PanelDemoPage() {
     const regionNames = comparativoRegiones.map((r) => r.label).join(", ")
     const prompt = t("panel.comparative.aiPrompt", { regions: regionNames })
 
-    setCompareQuery(prompt)
     setCompareLoadingState(true)
     setCompareErrorState(null)
-    setCompareLastQuestionState(prompt)
 
     try {
       const result = await aiAgentRepository.askQuery({
@@ -377,24 +356,22 @@ export function PanelDemoPage() {
     } finally {
       setCompareLoadingState(false)
     }
-  }, [comparativoRegiones, t, aiAgentRepository, locale, setCompareQuery])
+  }, [comparativoRegiones, t, aiAgentRepository, locale])
 
   const clearCompareResponse = useCallback(() => {
     setCompareResponseState(null)
     setCompareErrorState(null)
-    setCompareLastQuestionState("")
-    setCompareQuery("")
-  }, [setCompareQuery])
+  }, [])
 
   const comparePanelResponse = compareResponseState
     ? {
         respuesta_ia: compareResponseState.summary,
-        titulo: t("panel.aiAnalysis.title"),
+        titulo: t("panel.comparative.aiCompare"),
         metrica: t("panel.comparative.aiCompare"),
-        datos: compareResponseState.data.map((d) => ({
-          region: d.region,
-          valor: d.value,
-          fuente: d.source,
+        datos: comparativoRegiones.map((r) => ({
+          region: r.label,
+          valor: r.metricas[0]?.value ?? "—",
+          fuente: compareResponseState.sources[0] ?? "—",
         })),
         fuentes: [...compareResponseState.sources],
       }
@@ -421,7 +398,6 @@ export function PanelDemoPage() {
   const showComparativo = allComparativoRegiones.length >= 2
 
   const sidebarItems: { key: Section; icon: React.ComponentType<{ className?: string }>; label: string; hidden?: boolean }[] = [
-    { key: "dashboard", icon: LayoutDashboard, label: t("panel.dashboard") },
     { key: "mapa", icon: MapIcon, label: t("panel.map") },
     { key: "consulta", icon: Sparkles, label: t("panel.query") },
     { key: "comparativo", icon: BarChart3, label: t("panel.comparative"), hidden: !showComparativo },
@@ -449,216 +425,270 @@ export function PanelDemoPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
-      <PanelHeader
-        regions={regionOptions}
-        selectedRegionId={selectedRegionId ?? regionOptions[0]?.id ?? ""}
-        onRegionChange={setSelectedRegion}
-        locale={locale}
-        onLocaleChange={(l) => setLocale(l as Locale)}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={exportPdf}
-            disabled={exporting}
-            aria-label={t("export.label")}
-            title={t("export.label")}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <FileDown className="h-4 w-4 shrink-0" />
-            <span className="hidden sm:inline whitespace-nowrap">{exporting ? t("common.loading") : t("export.label")}</span>
-          </button>
+    <div className="relative h-dvh w-full overflow-hidden bg-background">
+      {/* ── Full-screen map (always rendered) ── */}
+      <div className="absolute inset-0 z-0">
+        <InteractiveMapWidget
+          repository={mobilityDataRepository}
+          regionId={selectedRegionId}
+          period={selectedPeriod}
+          vulnerableOnly={highConcentrationOnly}
+          showAntennas={showAntennas}
+          regions={mapRegions}
+          selectedRegionId={selectedZoneName}
+          onRegionSelect={setSelectedZoneName}
+          popupStrings={{
+            antennaLabel: t("map.legend.antenna"),
+            loadLabel: t("map.population"),
+            concentrationPoint: t("map.legend.highConcentration"),
+            intensityLabel: t("map.vulnerability"),
+          }}
+        />
+      </div>
 
-          <button
-            type="button"
-            onClick={() => setAlertHistoryOpen(true)}
-            aria-label={t("alert.bellLabel")}
-            title={t("alert.history")}
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <Bell className="h-4 w-4" />
-            {unacknowledgedCount > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground">
-                {unacknowledgedCount > 9 ? "9+" : unacknowledgedCount}
-              </span>
-            )}
-          </button>
+      {/* ── Dim overlay for non-map sections ── */}
+      {section !== "mapa" && (
+        <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm" />
+      )}
+
+      {/* ── Floating top bar ── */}
+      <div className="absolute inset-x-0 top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-3 px-4 py-2.5 md:px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Activity className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-semibold leading-tight">{t("panel.title")}</h1>
+              <p className="hidden truncate text-[10px] text-muted-foreground sm:block">{t("panel.subtitle")}</p>
+            </div>
+          </div>
+
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <Select
+              items={regionOptions.map((r) => ({ value: r.id, label: r.label }))}
+              value={selectedRegionId ?? regionOptions[0]?.id ?? ""}
+              onValueChange={(v: string | null) => v && setSelectedRegion(v)}
+            >
+              <SelectTrigger className="w-37.5 sm:w-52.5" aria-label={t("panel.region")}>
+                <Globe className="h-4 w-4 shrink-0 text-primary" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {regionOptions.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              items={LANGUAGE_OPTIONS}
+              value={locale}
+              onValueChange={(v: string | null) => v && setLocale(v as Locale)}
+            >
+              <SelectTrigger className="w-25" aria-label={t("panel.language")}>
+                <Languages className="h-4 w-4 shrink-0 text-primary" />
+                <SelectValue>{() => locale.toUpperCase()}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <button
+              type="button"
+              onClick={exportPdf}
+              disabled={exporting}
+              aria-label={t("export.label")}
+              title={t("export.label")}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <FileDown className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">{exporting ? t("common.loading") : t("export.label")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setAlertHistoryOpen(true)}
+              aria-label={t("alert.bellLabel")}
+              title={t("alert.history")}
+              className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {unacknowledgedCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground">
+                  {unacknowledgedCount > 9 ? "9+" : unacknowledgedCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-      </PanelHeader>
+      </div>
 
       <AlertHistoryPanel open={alertHistoryOpen} onClose={() => setAlertHistoryOpen(false)} />
 
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-2 md:hidden">
-        {sidebarItems
-          .filter((item) => !item.hidden)
-          .map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setSection(item.key)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                section === item.key
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <item.icon className="h-3.5 w-3.5" />
-              {item.label}
-            </button>
-          ))}
+      {/* ── Floating tab bar ── */}
+      <div className="absolute inset-x-0 top-14.25 z-30 border-b border-border/50 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-screen-2xl items-center gap-1 overflow-x-auto px-4 py-1.5 md:px-6">
+          {sidebarItems
+            .filter((item) => !item.hidden)
+            .map((item) => (
+              <button
+                key={item.key}
+                onClick={() => setSection(item.key)}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  section === item.key
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <item.icon className="h-3.5 w-3.5" />
+                {item.label}
+              </button>
+            ))}
+        </div>
       </div>
 
-      <div className="mx-auto flex min-h-0 w-full max-w-350 flex-1 px-4 md:px-6">
-        <aside className="hidden w-56 shrink-0 overflow-y-auto border-r border-border py-5 pr-4 md:block">
-          <nav className="flex flex-col gap-1">
-            {sidebarItems
-              .filter((item) => !item.hidden)
-              .map((item) => (
-                <SidebarItem
-                  key={item.key}
-                  icon={item.icon}
-                  label={item.label}
-                  active={section === item.key}
-                  onClick={() => setSection(item.key)}
-                />
+      {/* ── Floating map controls (period + filters) ── */}
+      {section === "mapa" && (
+        <div className="absolute left-4 top-27 z-20 flex flex-col gap-2 md:left-6">
+          {/* Indicator selector */}
+          <div className="rounded-xl border border-border/50 bg-background/80 p-2.5 backdrop-blur-md shadow-lg">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Layers className="h-3.5 w-3.5 text-primary" /> {t("panel.visualization")}
+            </div>
+            <Select
+              items={vistas.map((v) => ({ value: v.key, label: v.label }))}
+              value={vista}
+              onValueChange={(v: string | null) => v && setVista(v as Vista)}
+            >
+              <SelectTrigger className="w-full" aria-label={t("panel.indicatorToView")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {vistas.map((v) => (
+                  <SelectItem key={v.key} value={v.key}>
+                    {v.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Period buttons */}
+          <div className="rounded-xl border border-border/50 bg-background/80 p-2 backdrop-blur-md shadow-lg">
+            <div className="mb-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              {t("panel.period")}
+            </div>
+            <div className="flex gap-1">
+              {(["dawn", "morning", "afternoon", "night"] as const).map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  onClick={() => setSelectedPeriod(period)}
+                  aria-pressed={selectedPeriod === period}
+                  className={`inline-flex h-8 flex-1 items-center justify-center rounded-lg border px-2 text-[11px] font-medium transition-colors ${
+                    selectedPeriod === period
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted hover:border-ring"
+                  }`}
+                >
+                  {t(PERIOD_TRANSLATION_KEY[period] as TranslationKey)}
+                </button>
               ))}
-          </nav>
-        </aside>
-
-        <main className="min-w-0 flex-1 overflow-y-auto py-5 pl-4 md:pl-6">
-          {section === "dashboard" && (
-            <div>
-              <div className="mb-3">
-                <h1 className="text-lg font-semibold text-foreground">{t("panel.dashboard.title")}</h1>
-              </div>
-              {report && (
-                <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1">
-                    <span className="h-2 w-2 rounded-full bg-ok" />
-                    {t("panel.report.badge", {
-                      period: report.reportPeriod,
-                      date: formatLocaleDate(report.generatedAt, locale),
-                    })}
-                  </span>
-                </div>
-              )}
-              <KpiCards items={kpiItems} />
             </div>
-          )}
+          </div>
 
-          {section === "mapa" && (
-            <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">
-              <Card className="overflow-hidden p-0">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Layers className="h-4 w-4 text-primary" /> {t("panel.visualization")}
-                  </div>
-                  <Select
-                    items={vistas.map((v) => ({ value: v.key, label: v.label }))}
-                    value={vista}
-                    onValueChange={(v: string | null) => v && setVista(v as Vista)}
+          {/* Filter checkboxes */}
+          <div className="rounded-xl border border-border/50 bg-background/80 p-2.5 backdrop-blur-md shadow-lg space-y-2">
+            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showAntennas}
+                onChange={(e) => setShowAntennas(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border accent-accent"
+              />
+              {t("map.showAntennas")}
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={highConcentrationOnly}
+                onChange={(e) => setHighConcentrationOnly(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border accent-accent"
+              />
+              {t("map.highConcentrationOnly")}
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* ── Floating antenna detail card (right side) ── */}
+      {section === "mapa" && selectedMapPoint && (
+        <div className="absolute right-4 top-27 z-20 md:right-6">
+          <FloatingAntennaCard
+            nombre={selectedMapPoint.nombre}
+            municipio={selectedMapPoint.nombre !== selectedRegion?.name ? selectedRegion?.name : undefined}
+            poblacion={selectedVulnDetail ? formatLocaleNumber(selectedVulnDetail.totalPopulation, locale) : selectedMapPoint?.poblacion ? formatLocaleNumber(selectedMapPoint.poblacion, locale) : undefined}
+            cobertura={selectedMapPoint.cobertura}
+            brecha={selectedMapPoint.brecha}
+            antenas={selectedRegionForDetail ? String(selectedRegionForDetail.indicators.antennas) : undefined}
+            indicadores={detailIndicadores}
+            onClose={() => setSelectedZoneName(null)}
+          />
+        </div>
+      )}
+
+      {/* ── Floating zones list (bottom right) ── */}
+      {section === "mapa" && (
+        <div className="absolute bottom-16 right-4 z-20 hidden max-h-[40vh] w-64 overflow-hidden md:right-6 lg:block">
+          <div className="rounded-xl border border-border/50 bg-background/80 backdrop-blur-md shadow-lg">
+            <button
+              type="button"
+              onClick={() => setShowZonesList((v) => !v)}
+              className="flex w-full items-center justify-between gap-2 border-b border-border/50 px-3 py-2 text-left"
+            >
+              <div className="flex items-center gap-2">
+                <TriangleAlert className="h-3.5 w-3.5 text-alert" />
+                <h3 className="text-xs font-semibold">{t("panel.vulnerableRegions.title")}</h3>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${showZonesList ? "" : "-rotate-90"}`} />
+            </button>
+            {showZonesList && (
+              <div className="max-h-[calc(40vh-40px)] overflow-y-auto p-1.5">
+                {zonaItems.map((z) => (
+                  <button
+                    key={z.id}
+                    onClick={() => setSelectedZoneName(z.id)}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
+                      selectedZoneName === z.id
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
                   >
-                    <SelectTrigger className="w-50" aria-label={t("panel.indicatorToView")}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vistas.map((v) => (
-                        <SelectItem key={v.key} value={v.key}>
-                          {v.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-2.5">
-                  <div className="flex gap-1.5">
-                    {(["dawn", "morning", "afternoon", "night"] as const).map((period) => (
-                      <button
-                        key={period}
-                        type="button"
-                        onClick={() => setSelectedPeriod(period)}
-                        aria-pressed={selectedPeriod === period}
-                        className={`inline-flex h-8 items-center justify-center rounded-lg border px-3 text-xs font-medium transition-colors ${
-                          selectedPeriod === period
-                            ? "border-accent bg-accent text-accent-foreground"
-                            : "border-border bg-card text-muted-foreground hover:bg-muted hover:border-ring"
-                        }`}
-                      >
-                        {t(PERIOD_TRANSLATION_KEY[period] as TranslationKey)}
-                      </button>
-                    ))}
-                  </div>
-
-                  <label className="ml-auto inline-flex items-center gap-2 text-xs font-medium text-foreground">
-                    <input
-                      type="checkbox"
-                      checked={showAntennas}
-                      onChange={(e) => setShowAntennas(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-accent"
-                    />
-                    {t("map.showAntennas")}
-                  </label>
-
-                  <label className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
-                    <input
-                      type="checkbox"
-                      checked={highConcentrationOnly}
-                      onChange={(e) => setHighConcentrationOnly(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-accent"
-                    />
-                    {t("map.highConcentrationOnly")}
-                  </label>
-                </div>
-
-                <div className="h-95 w-full md:h-110">
-                  <InteractiveMapWidget
-                    repository={mobilityDataRepository}
-                    regionId={selectedRegionId}
-                    period={selectedPeriod}
-                    vulnerableOnly={highConcentrationOnly}
-                    showAntennas={showAntennas}
-                    regions={mapRegions}
-                    selectedRegionId={selectedZoneName}
-                    onRegionSelect={setSelectedZoneName}
-                    popupStrings={{
-                      antennaLabel: t("map.legend.antenna"),
-                      loadLabel: t("map.population"),
-                      concentrationPoint: t("map.legend.highConcentration"),
-                      intensityLabel: t("map.vulnerability"),
-                    }}
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-4 border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "#38bdf8" }} />{t("panel.legend.lowConnectivity")}</span>
-                  <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "#f5b642" }} />{t("panel.legend.medium")}</span>
-                  <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "#ef5a4c" }} />{t("panel.legend.highGap")}</span>
-                  <span className="ml-auto">{t("panel.legend.circleSize")}</span>
-                </div>
-              </Card>
-
-              <div className="flex flex-col gap-4">
-                <DetallePanel
-                  nombre={selectedMapPoint?.nombre ?? selectedRegion?.name}
-                  brecha={selectedMapPoint?.brecha}
-                  poblacion={selectedVulnDetail ? formatLocaleNumber(selectedVulnDetail.totalPopulation, locale) : selectedMapPoint?.poblacion ? formatLocaleNumber(selectedMapPoint.poblacion, locale) : undefined}
-                  cobertura={selectedMapPoint?.cobertura}
-                  antenas={selectedRegionForDetail ? String(selectedRegionForDetail.indicators.antennas) : undefined}
-                  indicadores={detailIndicadores}
-                />
-                <ZonasPanel
-                  zonas={zonaItems}
-                  seleccionado={selectedZoneName}
-                  onSelect={setSelectedZoneName}
-                  title={t("panel.vulnerableRegions.title")}
-                  description={t("panel.vulnerableRegions.description")}
-                />
+                    <span className="truncate">{z.nombre}</span>
+                    <span className="ml-2 shrink-0 font-mono text-[10px]">{z.brecha}</span>
+                  </button>
+                ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+      )}
 
-          {section === "consulta" && (
-            <div className="mt-4">
+      {/* ── Non-map section overlays ── */}
+      {section !== "mapa" && (
+        <div className="absolute inset-x-0 bottom-0 top-23.75 z-20 overflow-y-auto">
+          <div className="mx-auto max-w-3xl px-4 py-6 md:px-6">
+
+
+            {section === "consulta" && (
               <AiQueryPanel
                 consulta={query}
                 onConsultaChange={setQuery}
@@ -670,272 +700,262 @@ export function PanelDemoPage() {
                 onClear={clearResponse}
                 sugerencias={sugerencias}
               />
-            </div>
-          )}
+            )}
 
-          {section === "comparativo" && showComparativo && (
-            <div className="mt-4 flex flex-col gap-4">
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">{t("panel.comparative.title")}</h1>
-                <p className="text-xs text-muted-foreground">{t("panel.comparative.description")}</p>
-              </div>
+            {section === "comparativo" && showComparativo && (
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h1 className="text-lg font-semibold text-foreground">{t("panel.comparative.title")}</h1>
+                  <p className="text-xs text-muted-foreground">{t("panel.comparative.description")}</p>
+                </div>
 
-              {/* Search + Select All + Region chips */}
-              <Card className="p-4">
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <div className="relative flex-1 min-w-[200px] max-w-xs">
-                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder={t("panel.comparative.searchPlaceholder")}
-                      value={compareSearch}
-                      onChange={(e) => setCompareSearch(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-8 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
-                    />
-                    {compareSearch && (
-                      <button
-                        type="button"
-                        onClick={() => setCompareSearch("")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                <Card className="p-4">
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-50 max-w-xs">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder={t("panel.comparative.searchPlaceholder")}
+                        value={compareSearch}
+                        onChange={(e) => setCompareSearch(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-8 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
+                      />
+                      {compareSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setCompareSearch("")}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSelectAllRegions}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      {allRegionsSelected ? t("panel.comparative.clearAll") : t("panel.comparative.selectAll")}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filteredComparativeRegions.map((r) => {
+                      const selected = selectedComparativeRegions.includes(r.id)
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => toggleComparativeRegion(r.id)}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                            selected
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-card text-muted-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {selected && <Check className="h-3 w-3" />}
+                          {r.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length < 2 && (
+                    <p className="mt-2 text-[10px] text-muted-foreground">{t("panel.comparative.minRegions")}</p>
+                  )}
+                </Card>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-semibold text-foreground">
+                      {selectedComparativeRegions.length > 0
+                        ? `${selectedComparativeRegions.length} ${selectedComparativeRegions.length === 1 ? t("panel.comparative.regionSelected") : t("panel.comparative.regionsSelected")}`
+                        : t("panel.comparative.noneSelected")}
+                    </span>
+                    {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length <= 3 && (
+                      <>
+                        <span className="text-muted-foreground">·</span>
+                        <span className="text-muted-foreground text-xs">
+                          {selectedComparativeRegions.map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")}
+                        </span>
+                      </>
+                    )}
+                    {selectedComparativeRegions.length > 3 && (
+                      <>
+                        <span className="text-muted-foreground">·</span>
+                        <span className="text-muted-foreground text-xs">
+                          {selectedComparativeRegions.slice(0, 3).map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")} · +{selectedComparativeRegions.length - 3}
+                        </span>
+                      </>
                     )}
                   </div>
                   <button
                     type="button"
-                    onClick={handleSelectAllRegions}
-                    className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    onClick={handleAiCompare}
+                    disabled={selectedComparativeRegions.length < 2 || compareLoadingState}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {allRegionsSelected ? t("panel.comparative.clearAll") : t("panel.comparative.selectAll")}
+                    {compareLoadingState ? (
+                      <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      </svg>
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" />
+                    )}
+                    {compareLoadingState ? loadingMessage : t("panel.comparative.aiCompare")}
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {filteredComparativeRegions.map((r) => {
-                    const selected = selectedComparativeRegions.includes(r.id)
-                    return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => toggleComparativeRegion(r.id)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                          selected
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border bg-card text-muted-foreground hover:bg-muted"
-                        }`}
-                      >
-                        {selected && <Check className="h-3 w-3" />}
-                        {r.label}
-                      </button>
-                    )
-                  })}
-                </div>
-                {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length < 2 && (
-                  <p className="mt-2 text-[10px] text-muted-foreground">{t("panel.comparative.minRegions")}</p>
+
+                {comparativoRegiones.length >= 2 && (
+                  <Comparativo regiones={comparativoRegiones} chartData={chartData} />
                 )}
-              </Card>
 
-              {/* Action bar — inspired by equipo 69 pattern */}
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="font-semibold text-foreground">
-                    {selectedComparativeRegions.length > 0
-                      ? `${selectedComparativeRegions.length} ${selectedComparativeRegions.length === 1 ? t("panel.comparative.regionSelected") : t("panel.comparative.regionsSelected")}`
-                      : t("panel.comparative.noneSelected")}
-                  </span>
-                  {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length <= 3 && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground text-xs">
-                        {selectedComparativeRegions.map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")}
-                      </span>
-                    </>
-                  )}
-                  {selectedComparativeRegions.length > 3 && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground text-xs">
-                        {selectedComparativeRegions.slice(0, 3).map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")} · +{selectedComparativeRegions.length - 3}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAiCompare}
-                  disabled={selectedComparativeRegions.length < 2 || compareLoadingState}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {compareLoadingState ? (
-                    <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
-                      <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                    </svg>
-                  ) : (
-                    <Sparkles className="h-3.5 w-3.5" />
-                  )}
-                  {compareLoadingState ? loadingMessage : t("panel.comparative.aiCompare")}
-                </button>
-              </div>
-
-              {comparativoRegiones.length >= 2 && (
-                <Comparativo
-                  regiones={comparativoRegiones}
-                  chartData={chartData}
-                />
-              )}
-
-              {comparativoRegiones.length < 2 && selectedComparativeRegions.length >= 2 && (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <p className="text-sm text-muted-foreground">{t("panel.comparative.minRegions")}</p>
-                </div>
-              )}
-
-              {/* AI Response */}
-              {compareErrorState && (
-                <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-                  <p className="text-sm text-destructive">{compareErrorState}</p>
-                </div>
-              )}
-
-              {comparePanelResponse && (
-                <div className="rounded-xl border border-border bg-card p-5">
-                  <div className="mb-4 flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold">{t("panel.comparative.aiCompare")}</h3>
-                      <p className="text-[10px] text-muted-foreground">{t("panel.comparative.description")}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={clearCompareResponse}
-                      className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                {comparativoRegiones.length < 2 && selectedComparativeRegions.length >= 2 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <p className="text-sm text-muted-foreground">{t("panel.comparative.minRegions")}</p>
                   </div>
+                )}
 
-                  {comparePanelResponse.respuesta_ia && (
-                    <div className="mb-4 rounded-lg bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
-                      {comparePanelResponse.respuesta_ia}
+                {compareErrorState && (
+                  <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                    <p className="text-sm text-destructive">{compareErrorState}</p>
+                  </div>
+                )}
+
+                {comparePanelResponse && (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                        <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold">{t("panel.comparative.aiCompare")}</h3>
+                        <p className="text-[10px] text-muted-foreground">{t("panel.comparative.description")}</p>
+                      </div>
+                      <button type="button" onClick={clearCompareResponse} className="ml-auto text-muted-foreground hover:text-foreground transition-colors">
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                  )}
 
-                  {comparePanelResponse.datos && comparePanelResponse.datos.length > 0 && (
-                    <div className="overflow-hidden rounded-lg border border-border">
-                      <table className="w-full text-sm">
-                        <thead className="bg-muted/50 text-xs text-muted-foreground">
-                          <tr>
-                            <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.region")}</th>
-                            <th className="px-3 py-2 text-right font-medium">{t("panel.queryTable.value")}</th>
-                            <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.source")}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {comparePanelResponse.datos.map((d, i) => (
-                            <tr key={d.region} className={i % 2 ? "bg-background/40" : ""}>
-                              <td className="px-3 py-2">{d.region}</td>
-                              <td className="px-3 py-2 text-right font-mono">{typeof d.valor === "number" ? d.valor.toLocaleString() : d.valor}</td>
-                              <td className="px-3 py-2 text-xs text-muted-foreground">{d.fuente}</td>
+                    {comparePanelResponse.respuesta_ia && (
+                      <div className="mb-4 rounded-lg bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
+                        {comparePanelResponse.respuesta_ia}
+                      </div>
+                    )}
+
+                    {comparePanelResponse.datos && comparePanelResponse.datos.length > 0 && (
+                      <div className="overflow-hidden rounded-lg border border-border">
+                        <table className="w-full text-sm">
+                          <thead className="bg-muted/50 text-xs text-muted-foreground">
+                            <tr>
+                              <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.region")}</th>
+                              <th className="px-3 py-2 text-right font-medium">{t("panel.queryTable.value")}</th>
+                              <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.source")}</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                          </thead>
+                          <tbody>
+                            {comparePanelResponse.datos.map((d, i) => (
+                              <tr key={d.region} className={i % 2 ? "bg-background/40" : ""}>
+                                <td className="px-3 py-2 font-medium">{d.region}</td>
+                                <td className="px-3 py-2 text-right font-mono">{d.valor}</td>
+                                <td className="px-3 py-2 text-xs text-muted-foreground">{d.fuente}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
 
-                  {comparePanelResponse.fuentes && comparePanelResponse.fuentes.length > 0 && (
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">{t("panel.querySources")}</span>
-                      {comparePanelResponse.fuentes.map((f) => (
-                        <span key={f} className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {f}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {section === "mentorias" && (
-            <div className="mt-4">
-              <div className="mb-3">
-                <h1 className="text-lg font-semibold text-foreground">{t("panel.mentorship.title")}</h1>
-              </div>
-              {mentorshipData.loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Spinner size="lg" />
-                </div>
-              ) : mentorshipData.error && mentorshipData.gaps.length === 0 && mentorshipData.programs.length === 0 ? (
-                isColdStartError(mentorshipData.error) ? (
-                  <BackendWakingUp
-                    message={t("panel.backendWakingUp")}
-                    subMessage={t("panel.backendWakingUpSub")}
-                    retryLabel={t("panel.retry")}
-                    onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <TriangleAlert className="h-8 w-8 text-destructive" />
-                    <p className="text-sm text-destructive">{mentorshipData.error}</p>
+                    {comparePanelResponse.fuentes && comparePanelResponse.fuentes.length > 0 && (
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground">{t("panel.querySources")}</span>
+                        {comparePanelResponse.fuentes.map((f) => (
+                          <span key={f} className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )
-              ) : (
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <MentorshipGapsPanel gaps={mentorshipData.gaps} />
-                  <MentorshipProgramsPanel
-                    programs={mentorshipData.programs}
-                    clusters={mentorshipData.clusters}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {section === "empleabilidad" && (
-            <div className="mt-4">
-              <div className="mb-3">
-                <h1 className="text-lg font-semibold text-foreground">{t("panel.employability.title")}</h1>
+                )}
               </div>
-              {employabilityData.loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Spinner size="lg" />
+            )}
+
+            {section === "mentorias" && (
+              <div>
+                <div className="mb-3">
+                  <h1 className="text-lg font-semibold text-foreground">{t("panel.mentorship.title")}</h1>
                 </div>
-              ) : employabilityData.error && employabilityData.gaps.length === 0 && employabilityData.odMatrix.length === 0 ? (
-                isColdStartError(employabilityData.error) ? (
-                  <BackendWakingUp
-                    message={t("panel.backendWakingUp")}
-                    subMessage={t("panel.backendWakingUpSub")}
-                    retryLabel={t("panel.retry")}
-                    onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                    <TriangleAlert className="h-8 w-8 text-destructive" />
-                    <p className="text-sm text-destructive">{employabilityData.error}</p>
+                {mentorshipData.loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Spinner size="lg" />
                   </div>
-                )
-              ) : (
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <EmployabilityGapsPanel gaps={employabilityData.gaps} />
-                  <EmployabilityOdMatrixPanel odMatrix={employabilityData.odMatrix} />
+                ) : mentorshipData.error && mentorshipData.gaps.length === 0 && mentorshipData.programs.length === 0 ? (
+                  isColdStartError(mentorshipData.error) ? (
+                    <BackendWakingUp
+                      message={t("panel.backendWakingUp")}
+                      subMessage={t("panel.backendWakingUpSub")}
+                      retryLabel={t("panel.retry")}
+                      onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                      <TriangleAlert className="h-8 w-8 text-destructive" />
+                      <p className="text-sm text-destructive">{mentorshipData.error}</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <MentorshipGapsPanel gaps={mentorshipData.gaps} />
+                    <MentorshipProgramsPanel programs={mentorshipData.programs} clusters={mentorshipData.clusters} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {section === "empleabilidad" && (
+              <div>
+                <div className="mb-3">
+                  <h1 className="text-lg font-semibold text-foreground">{t("panel.employability.title")}</h1>
                 </div>
-              )}
-            </div>
-          )}
-        </main>
+                {employabilityData.loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Spinner size="lg" />
+                  </div>
+                ) : employabilityData.error && employabilityData.gaps.length === 0 && employabilityData.odMatrix.length === 0 ? (
+                  isColdStartError(employabilityData.error) ? (
+                    <BackendWakingUp
+                      message={t("panel.backendWakingUp")}
+                      subMessage={t("panel.backendWakingUpSub")}
+                      retryLabel={t("panel.retry")}
+                      onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                      <TriangleAlert className="h-8 w-8 text-destructive" />
+                      <p className="text-sm text-destructive">{employabilityData.error}</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <EmployabilityGapsPanel gaps={employabilityData.gaps} />
+                    <EmployabilityOdMatrixPanel odMatrix={employabilityData.odMatrix} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Footer ── */}
+      <div className="absolute inset-x-0 bottom-0 z-20 border-t border-border/50 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-screen-2xl px-4 py-2 text-[10px] text-muted-foreground md:px-6">
+          {t("panel.footer", {
+            period: report?.reportPeriod ?? "—",
+            population: report ? formatLocaleNumber(report.metadata.totalPopulation, locale) : "—",
+          })}
+        </div>
       </div>
-
-      <footer className="mx-auto w-full max-w-350 border-t border-border px-4 pt-4 pb-6 text-xs text-muted-foreground md:px-6">
-        {t("panel.footer", {
-          period: report?.reportPeriod ?? "—",
-          population: report ? formatLocaleNumber(report.metadata.totalPopulation, locale) : "—",
-        })}
-      </footer>
     </div>
   )
 }

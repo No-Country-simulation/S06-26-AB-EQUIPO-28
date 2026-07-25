@@ -10,7 +10,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   // The Navbar hides itself on /panel (the page brings its own header), so
   // only offset the fixed 4rem navbar on routes where it actually renders.
   const location = useLocation();
-  const hasNavbar = !location.pathname.startsWith("/panel");
+  const hasNavbar = !location.pathname.startsWith("/mapa");
 
   return (
     <div className="flex min-h-screen flex-col">

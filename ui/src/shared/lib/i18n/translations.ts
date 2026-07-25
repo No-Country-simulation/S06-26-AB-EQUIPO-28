@@ -22,9 +22,9 @@ export type TranslationKey = keyof typeof translations.es;
 export const translations: Record<Locale, Record<string, string>> = {
   es: {
     //  Navbar
-    "nav.map": "Mapa Interactivo",
+    "nav.map": "Panel Bit",
     "nav.methodology": "Metodología",
-    "nav.panel": "Panel",
+    "nav.panel": "Mapa Interactivo",
     "nav.brand": "Panel BiT",
     "nav.menuLabel": "Abrir menú de navegación",
 
@@ -244,8 +244,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.detail.coverage": "cobertura",
     "panel.detail.antennas": "antenas",
     "panel.detail.gap": "Brecha {level}",
+    "panel.detail.gapLabel": "Nivel de brecha",
     "panel.detail.networkMix": "Mix de red",
     "panel.detail.indicators": "Indicadores",
+    "panel.period": "Horario",
     "panel.data.real": "Datos reales",
     "panel.data.emulated": "Datos emulados",
 
@@ -291,7 +293,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.dashboard.title": "Resumen general",
 
     //  Landing Page
-    "landing.hero.badge": "Panel BiT — Panel de Datos Públicos",
+
     "landing.hero.title": "Datos territoriales para decidir dónde impacta más",
     "landing.hero.description": "Cruza empleabilidad, salud mental y movilidad en un solo mapa. Detecta brechas de inclusión, consulta en lenguaje natural y obtén recomendaciones con fuentes verificadas.",
     "landing.hero.cta.primary": "Explorar mapa inteligente",
@@ -584,8 +586,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.detail.coverage": "cobertura",
     "panel.detail.antennas": "antenas",
     "panel.detail.gap": "Gap {level}",
+    "panel.detail.gapLabel": "Nível de gap",
     "panel.detail.networkMix": "Mix de rede",
     "panel.detail.indicators": "Indicadores",
+    "panel.period": "Período",
     "panel.data.real": "Dados reais",
     "panel.data.emulated": "Dados emulados",
 
@@ -924,8 +928,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "panel.detail.coverage": "coverage",
     "panel.detail.antennas": "antennas",
     "panel.detail.gap": "Gap {level}",
+    "panel.detail.gapLabel": "Gap level",
     "panel.detail.networkMix": "Network mix",
     "panel.detail.indicators": "Indicators",
+    "panel.period": "Period",
     "panel.data.real": "Real data",
     "panel.data.emulated": "Emulated data",
 

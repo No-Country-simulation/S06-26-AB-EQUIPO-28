@@ -7,9 +7,9 @@
 //
 // Route structure:
 //   /           → LandingPage
-//   /panel      → PanelDemoPage (unified map + dashboard view)
+//   /mapa      → PanelDemoPage (unified map + table view)
 //   /metodologia → MethodologyPage
-//   *           → redirect → /panel
+//   *           → redirect → /mapa
 // ---------------------------------------------------------------------------
 
 import {
@@ -30,10 +30,10 @@ export function AppRouter() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/metodologia" element={<MethodologyPage />} />
-          <Route path="/panel" element={<PanelDemoPage />} />
+          <Route path="/mapa" element={<PanelDemoPage />} />
           <Route
             path="*"
-            element={<Navigate to="/panel" replace />}
+            element={<Navigate to="/mapa" replace />}
           />
         </Routes>
       </AppLayout>
