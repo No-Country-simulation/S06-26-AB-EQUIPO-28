@@ -360,6 +360,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "landing.footer.panel": "Panel",
     "landing.footer.privacy_link": "Privacidad",
     "landing.footer.contact": "Contacto",
+
+    "landing.footer.map": "Mapa Interactivo",
   },
 
   pt: {
@@ -702,6 +704,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "landing.footer.panel": "Painel",
     "landing.footer.privacy_link": "Privacidade",
     "landing.footer.contact": "Contacto",
+    "landing.footer.map": "Mapa Interativo",
   },
 
   en: {
@@ -1044,5 +1047,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "landing.footer.panel": "Panel",
     "landing.footer.privacy_link": "Privacy",
     "landing.footer.contact": "Contact",
+    "landing.footer.map": "Interactive Map",
   },
 };

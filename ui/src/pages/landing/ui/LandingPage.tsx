@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/Button";
 import { LandingMap } from "./LandingMap.tsx";
@@ -138,6 +139,7 @@ const FEATURES = [
 
 function Hero({ t }: { t: (key: string) => string }) {
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t1 = setTimeout(() => setVisible(true), 100);
@@ -152,17 +154,16 @@ function Hero({ t }: { t: (key: string) => string }) {
       aria-labelledby="hero-title"
     >
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
         style={{ backgroundImage: "url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-background" />
 
 
       <div className="relative z-10 w-full max-w-6xl px-6 py-20 mx-auto">
         <div
-          className={`transition-all duration-1000 ease-out ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+          className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
         >
 
           <h1
@@ -180,7 +181,7 @@ function Hero({ t }: { t: (key: string) => string }) {
               variant="default"
               size="lg"
               className="group h-11 px-6"
-              onClick={() => document.getElementById("mapa")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => navigate("/mapa")}
             >
               <Icon name="mapa" size={18} className="mr-2 group-hover:translate-x-0.5 transition-transform" />
               {t("landing.hero.cta.primary")}
@@ -249,11 +250,10 @@ function Features({ t }: { t: (key: string) => string }) {
               key={feature.key}
               data-index={index}
               data-feature-card
-              className={`group relative rounded-2xl border border-border/50 bg-card p-6 transition-all duration-500 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 ${
-                visibleItems.has(index)
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
+              className={`group relative rounded-2xl border border-border/50 bg-card p-6 transition-all duration-500 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 ${visibleItems.has(index)
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+                }`}
               role="listitem"
               style={{ transitionDelay: `${index * 80}ms` }}
             >
@@ -319,9 +319,8 @@ function HowItWorks({ t }: { t: (key: string) => string }) {
             {steps.map((step, index) => (
               <div
                 key={step.number}
-                className={`relative flex gap-6 lg:gap-8 ${
-                  index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-                }`}
+                className={`relative flex gap-6 lg:gap-8 ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                  }`}
               >
                 <div className="flex-1 lg:w-1/2 flex flex-col items-center lg:items-end text-right lg:pr-12">
                   <div className="mb-4 flex items-center justify-end lg:justify-end gap-3">
@@ -333,9 +332,8 @@ function HowItWorks({ t }: { t: (key: string) => string }) {
                 </div>
                 <div className="relative shrink-0 lg:w-1/2">
                   <div
-                    className={`relative aspect-square max-w-sm mx-auto rounded-2xl bg-card border border-border/50 overflow-hidden ${
-                      index % 2 === 0 ? "lg:ml-auto" : "lg:mr-auto"
-                    }`}
+                    className={`relative aspect-square max-w-sm mx-auto rounded-2xl bg-card border border-border/50 overflow-hidden ${index % 2 === 0 ? "lg:ml-auto" : "lg:mr-auto"
+                      }`}
                   >
                     <LandingMap
                       initialView={step.mapView}
@@ -398,6 +396,7 @@ function Sources({ t }: { t: (key: string) => string }) {
 }
 
 function CTA({ t }: { t: (key: string) => string }) {
+  const navigate = useNavigate();
   return (
     <section className="py-20 sm:py-28 px-6 bg-primary" aria-labelledby="cta-title">
       <div className="max-w-3xl mx-auto text-center">
@@ -412,7 +411,7 @@ function CTA({ t }: { t: (key: string) => string }) {
             variant="secondary"
             size="lg"
             className="w-full sm:w-auto h-11 px-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            onClick={() => document.getElementById("/panel")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => navigate("/mapa")}
           >
             <Icon name="mapa" size={18} className="mr-2" />
             {t("landing.cta.primary")}
