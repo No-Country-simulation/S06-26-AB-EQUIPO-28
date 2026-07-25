@@ -126,25 +126,28 @@ function Icon({
   }
 }
 
+const ETIQUETAS = [
+  { nombre: "Centro", x: 61.5, y: 22.5 },
+  { nombre: "Norte", x: 76.5, y: 29 },
+  { nombre: "Sur", x: 90.0, y: 47 },
+  { nombre: "Este", x: 54.5, y: 54 },
+  { nombre: "Oeste", x: 79.0, y: 66.5 },
+];
+
 const FEATURES = [
   { icon: "grafico", key: "diagnosis" },
   { icon: "chat", key: "query" },
   { icon: "mapa", key: "map" },
-  { icon: "personas", key: "vulnerable" },
-  { icon: "doc", key: "methodology" },
   { icon: "check", key: "recommendations" },
 ];
 
 function Hero({ t }: { t: (key: string) => string }) {
   const [visible, setVisible] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(false);
 
   useEffect(() => {
     const t1 = setTimeout(() => setVisible(true), 100);
-    const t2 = setTimeout(() => setStatsVisible(true), 600);
     return () => {
       clearTimeout(t1);
-      clearTimeout(t2);
     };
   }, []);
 
@@ -156,6 +159,21 @@ function Hero({ t }: { t: (key: string) => string }) {
     >
       <div className="absolute inset-0 bg-background/90" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,var(--background)_100%)]" />
+
+      {/* Map labels on desktop - like equipo 69 */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none">
+        {ETIQUETAS.map((e) => (
+          <span
+            key={e.nombre}
+            className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[12.5px] font-semibold text-foreground"
+            style={{
+              left: `${e.x}%`,
+              top: `${e.y}%`,
+              textShadow: "0 0 6px rgba(255,255,255,0.9), 0 1px 3px rgba(255,255,255,0.85), 0 0 14px rgba(255,255,255,0.7)",
+            }}
+          >{e.nombre}</span>
+        ))}
+      </div>
 
       <div className="relative z-10 w-full max-w-6xl px-6 py-20 mx-auto">
         <div
@@ -197,55 +215,6 @@ function Hero({ t }: { t: (key: string) => string }) {
               {t("landing.hero.cta.secondary")}
               <Icon name="flecha" size={16} className="ml-2" />
             </Button>
-          </div>
-        </div>
-
-        <div
-          className={`mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6 transition-all duration-1000 ease-out ${
-            statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          }`}
-          role="list"
-          aria-label="Estadísticas clave"
-        >
-          <div
-            key="regions"
-            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
-            role="listitem"
-          >
-            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              2.500+
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.regions")}</div>
-          </div>
-          <div
-            key="indicators"
-            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
-            role="listitem"
-          >
-            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              12
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.indicators")}</div>
-          </div>
-          <div
-            key="coverage"
-            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
-            role="listitem"
-          >
-            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              94%
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.coverage")}</div>
-          </div>
-          <div
-            key="realtime"
-            className="text-center p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors duration-300"
-            role="listitem"
-          >
-            <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Tiempo real
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground font-medium">{t("landing.stats.realtime")}</div>
           </div>
         </div>
       </div>

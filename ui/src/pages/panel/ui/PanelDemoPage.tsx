@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import {
   useLanguage,
   formatLocaleNumber,
@@ -95,6 +95,13 @@ export function PanelDemoPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("morning")
   const [showAntennas, setShowAntennas] = useState(true)
   const [highConcentrationOnly, setHighConcentrationOnly] = useState(false)
+
+  // When "Solo regiones vulnerables (≥66)" is checked, hide antennas automatically
+  useEffect(() => {
+    if (highConcentrationOnly) {
+      setShowAntennas(false)
+    }
+  }, [highConcentrationOnly])
   const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
 
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
@@ -108,6 +115,10 @@ export function PanelDemoPage() {
     aiResponse: response,
     period: selectedPeriod,
     locale,
+    mentalHealthReport: report,
+    vulnerableRegions: vulnerableRegions,
+    employabilityGaps: employabilityData.gaps,
+    allRegions: regions,
   })
 
   const handleAiSubmit = useCallback(() => {

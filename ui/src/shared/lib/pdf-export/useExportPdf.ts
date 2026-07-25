@@ -3,6 +3,8 @@ import { generatePdfReport } from "./generateReport.ts";
 import type { IndicatorValue } from "@/entities/indicator";
 import type { AiResponse } from "@/entities/ai-agent";
 import type { Region } from "@/entities/region";
+import type { MentalHealthReport, RegionVulnerabilitySummary } from "@/entities/mental-health";
+import type { EmployabilityGap } from "@/entities/employability";
 
 interface UseExportPdfOptions {
   region: Region | null;
@@ -10,6 +12,10 @@ interface UseExportPdfOptions {
   aiResponse: AiResponse | null;
   period: string;
   locale: string;
+  mentalHealthReport: MentalHealthReport | null;
+  vulnerableRegions: readonly RegionVulnerabilitySummary[];
+  employabilityGaps: readonly EmployabilityGap[];
+  allRegions: Region[];
 }
 
 export function useExportPdf(options: UseExportPdfOptions) {
@@ -24,6 +30,10 @@ export function useExportPdf(options: UseExportPdfOptions) {
         aiResponse: options.aiResponse,
         period: options.period,
         locale: options.locale,
+        mentalHealthReport: options.mentalHealthReport,
+        vulnerableRegions: [...options.vulnerableRegions],
+        employabilityGaps: [...options.employabilityGaps],
+        allRegions: options.allRegions,
       });
     } finally {
       setExporting(false);

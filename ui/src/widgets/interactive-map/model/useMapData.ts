@@ -65,11 +65,10 @@ export function useMapData(
     if (antennaCache.has(antennaKey)) {
       if (!cancelled.current) {
         const cachedAntennas = antennaCache.get(antennaKey)!;
-        const filteredAntennas = vulnerableOnly
-          ? cachedAntennas.filter((a) => a.loadLevel === "HIGH")
-          : cachedAntennas;
-        console.log("[useMapData] antennas from CACHE:", filteredAntennas.length, "region:", antennaKey);
-        setAntennas(filteredAntennas);
+        // Don't filter antennas based on vulnerableOnly - always show all antennas
+        // The vulnerableOnly filter only applies to concentration pins
+        console.log("[useMapData] antennas from CACHE:", cachedAntennas.length, "region:", antennaKey);
+        setAntennas(cachedAntennas);
       }
     } else {
       try {
@@ -78,10 +77,8 @@ export function useMapData(
         console.log("[useMapData] antennas fetched:", antennaData.length, "region:", antennaKey);
         if (!cancelled.current) {
           antennaCache.set(antennaKey, antennaData);
-          const filteredAntennas = vulnerableOnly
-            ? antennaData.filter((a) => a.loadLevel === "HIGH")
-            : antennaData;
-          setAntennas(filteredAntennas);
+          // Don't filter antennas based on vulnerableOnly - always show all antennas
+          setAntennas(antennaData);
         }
       } catch (err) {
         console.error("[useMapData] antenna fetch FAILED:", err);

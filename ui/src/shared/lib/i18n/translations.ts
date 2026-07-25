@@ -21,7 +21,7 @@ export type TranslationKey = keyof typeof translations.es;
 
 export const translations: Record<Locale, Record<string, string>> = {
   es: {
-    //  Navbar 
+    //  Navbar
     "nav.map": "Mapa Interactivo",
     "nav.methodology": "Metodología",
     "nav.panel": "Panel",
@@ -96,7 +96,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "methodology.securityDesc":
       "El acceso a la API está protegido por autenticación JWT con tokens de acceso y refresh. Los endpoints de IA tienen rate limiting de 10 solicitudes por minuto por IP para evitar abusos.",
 
-    //  Common 
+    //  Common
     "common.loading": "Cargando…",
     "common.error": "Error",
     "common.retry": "Intentar de nuevo",
@@ -106,20 +106,20 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noData": "Sin datos disponibles",
     "common.search": "Buscar",
 
-    //  Indicators 
+    //  Indicators
     "indicator.employabilityGap": "Brecha de Empleabilidad",
     "indicator.trainingCoverage": "Cobertura de Formación",
     "indicator.mentalHealthAccess": "Acceso a Salud Mental",
     "indicator.mentorshipPrograms": "Programas de Mentoría",
     "indicator.structuredExperiences": "Experiencias Estructurantes",
 
-    //  Severity 
+    //  Severity
     "severity.high": "Alto",
     "severity.medium": "Medio",
     "severity.low": "Bajo",
     "severity.critical": "Crítico",
 
-    //  Trends 
+    //  Trends
     "trend.improving": "Mejorando",
     "trend.stable": "Estable",
     "trend.declining": "Deteriorando",
@@ -131,7 +131,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "badge.info": "Información",
     "badge.neutral": "Neutral",
 
-    //  Mental Health 
+    //  Mental Health
     "mentalHealth.title": "Salud Mental Comunitaria",
     "mentalHealth.indicators": "Indicadores",
     "mentalHealth.score": "Puntuación",
@@ -143,7 +143,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "mentalHealth.averageScore": "Score promedio",
     "mentalHealth.priorityRegions": "Regiones prioritarias",
     "map.showAntennas": "Mostrar antenas",
-    "map.highConcentrationOnly": "Solo alta concentración",
+    "map.highConcentrationOnly": "Solo regiones vulnerables (≥66)",
 
     //  Alerts
     "alert.thresholdsTitle": "Umbrales de Alerta",
@@ -273,7 +273,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     //  Landing Page
     "landing.hero.badge": "App BiT — Panel de Datos Públicos",
-    "landing.hero.title": "Datos territoriales para\n<span class=\"text-primary\">decidir dónde impacta más</span>",
+    "landing.hero.title": "Datos territoriales para decidir dónde impacta más",
     "landing.hero.description": "Cruza empleabilidad, salud mental y movilidad en un solo mapa. Detecta brechas de inclusión, consulta en lenguaje natural y obtén recomendaciones con fuentes verificadas.",
     "landing.hero.cta.primary": "Explorar mapa inteligente",
     "landing.hero.cta.secondary": "Ver metodología",
@@ -342,7 +342,7 @@ export const translations: Record<Locale, Record<string, string>> = {
   },
 
   pt: {
-    //  Navbar 
+    //  Navbar
     "nav.map": "Mapa Interativo",
     "nav.methodology": "Metodologia",
     "nav.panel": "Painel",
@@ -417,7 +417,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "methodology.securityDesc":
       "O acesso à API é protegido por autenticação JWT com tokens de acesso e refresh. Endpoints de IA possuem rate limiting de 10 requisições por minuto por IP para evitar abuso.",
 
-    //  Common 
+    //  Common
     "common.loading": "Carregando…",
     "common.error": "Erro",
     "common.retry": "Tentar novamente",
@@ -427,20 +427,20 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noData": "Sem dados disponíveis",
     "common.search": "Buscar",
 
-    //  Indicators 
+    //  Indicators
     "indicator.employabilityGap": "Brecha de Empregabilidade",
     "indicator.trainingCoverage": "Cobertura de Treinamento",
     "indicator.mentalHealthAccess": "Acesso à Saúde Mental",
     "indicator.mentorshipPrograms": "Programas de Mentoría",
     "indicator.structuredExperiences": "Experiências Estruturantes",
 
-    //  Severity 
+    //  Severity
     "severity.high": "Alto",
     "severity.medium": "Médio",
     "severity.low": "Baixo",
     "severity.critical": "Crítico",
 
-    //  Trends 
+    //  Trends
     "trend.improving": "Melhorando",
     "trend.stable": "Estável",
     "trend.declining": "Piorando",
@@ -452,7 +452,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "badge.info": "Informação",
     "badge.neutral": "Neutro",
 
-    //  Mental Health 
+    //  Mental Health
     "mentalHealth.title": "Saúde Mental Comunitária",
     "mentalHealth.indicators": "Indicadores",
     "mentalHealth.score": "Pontuação",
@@ -464,7 +464,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "mentalHealth.averageScore": "Pontuação média",
     "mentalHealth.priorityRegions": "Regiões prioritárias",
     "map.showAntennas": "Mostrar antenas",
-    "map.highConcentrationOnly": "Só alta concentração",
+    "map.highConcentrationOnly": "Só regiões vulneráveis (≥66)",
 
     //  Alerts
     "alert.thresholdsTitle": "Limites de Alerta",
@@ -663,7 +663,7 @@ export const translations: Record<Locale, Record<string, string>> = {
   },
 
   en: {
-    //  Navbar 
+    //  Navbar
     "nav.map": "Interactive Map",
     "nav.methodology": "Methodology",
     "nav.panel": "Panel",
@@ -738,7 +738,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "methodology.securityDesc":
       "API access is protected by JWT authentication with access and refresh tokens. AI endpoints have rate limiting of 10 requests per minute per IP to prevent abuse.",
 
-    //  Common 
+    //  Common
     "common.loading": "Loading…",
     "common.error": "Error",
     "common.retry": "Try again",
@@ -748,20 +748,20 @@ export const translations: Record<Locale, Record<string, string>> = {
     "common.noData": "No data available",
     "common.search": "Search",
 
-    //  Indicators 
+    //  Indicators
     "indicator.employabilityGap": "Employability Gap",
     "indicator.trainingCoverage": "Training Coverage",
     "indicator.mentalHealthAccess": "Mental Health Access",
     "indicator.mentorshipPrograms": "Mentorship Programs",
     "indicator.structuredExperiences": "Structuring Experiences",
 
-    //  Severity 
+    //  Severity
     "severity.high": "High",
     "severity.medium": "Medium",
     "severity.low": "Low",
     "severity.critical": "Critical",
 
-    //  Trends 
+    //  Trends
     "trend.improving": "Improving",
     "trend.stable": "Stable",
     "trend.declining": "Declining",
@@ -773,7 +773,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "badge.info": "Info",
     "badge.neutral": "Neutral",
 
-    //  Mental Health 
+    //  Mental Health
     "mentalHealth.title": "Community Mental Health",
     "mentalHealth.indicators": "Indicators",
     "mentalHealth.score": "Score",
@@ -785,7 +785,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "mentalHealth.averageScore": "Average score",
     "mentalHealth.priorityRegions": "Priority regions",
     "map.showAntennas": "Show antennas",
-    "map.highConcentrationOnly": "High concentration only",
+    "map.highConcentrationOnly": "Vulnerable regions only (≥66)",
 
     //  Alerts
     "alert.thresholdsTitle": "Alert Thresholds",
