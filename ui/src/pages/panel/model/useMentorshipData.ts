@@ -26,6 +26,7 @@ export function useMentorshipData(
   mentorshipRepository: MentorshipRepository,
   errorFallback: string,
   retryKey: number = 0,
+  delay: number = 2000,
 ): MentorshipData {
   const [programs, setPrograms] = useState<readonly MentorshipProgram[]>([]);
   const [gaps, setGaps] = useState<readonly MentorshipGap[]>([]);
@@ -35,6 +36,8 @@ export function useMentorshipData(
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
     async function load() {
       setLoading(true);
       setError(null);
@@ -71,11 +74,16 @@ export function useMentorshipData(
         setLoading(false);
       }
     }
-    load();
+
+    timer = setTimeout(() => {
+      if (!cancelled) load();
+    }, delay);
+
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
-  }, [mentorshipRepository, errorFallback, retryKey]);
+  }, [mentorshipRepository, errorFallback, retryKey, delay]);
 
   return { programs, gaps, clusters, loading, error };
 }

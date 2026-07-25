@@ -26,6 +26,7 @@ export function useEmployabilityData(
   employabilityRepository: EmployabilityRepository,
   errorFallback: string,
   retryKey: number = 0,
+  delay: number = 4000,
 ): EmployabilityData {
   const [odMatrix, setOdMatrix] = useState<readonly MobilityODPair[]>([]);
   const [travelTimes, setTravelTimes] = useState<readonly TravelTime[]>([]);
@@ -35,6 +36,8 @@ export function useEmployabilityData(
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
     async function load() {
       setLoading(true);
       setError(null);
@@ -71,11 +74,16 @@ export function useEmployabilityData(
         setLoading(false);
       }
     }
-    load();
+
+    timer = setTimeout(() => {
+      if (!cancelled) load();
+    }, delay);
+
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
-  }, [employabilityRepository, errorFallback, retryKey]);
+  }, [employabilityRepository, errorFallback, retryKey, delay]);
 
   return { odMatrix, travelTimes, gaps, loading, error };
 }
