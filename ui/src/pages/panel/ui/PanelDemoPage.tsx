@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo, useEffect } from "react"
+import { useState, useCallback, useMemo, useEffect, startTransition } from "react"
 import {
   useLanguage,
   formatLocaleNumber,
@@ -16,7 +16,7 @@ import { useExportPdf } from "@/shared/lib/pdf-export"
 import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPanel, MentorshipGapsPanel, MentorshipProgramsPanel, EmployabilityGapsPanel, EmployabilityOdMatrixPanel } from "@/widgets/panel"
 import { InteractiveMapWidget } from "@/widgets/interactive-map"
 import type { RegionPoint } from "@/widgets/interactive-map"
-import { Card, Spinner, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
+import { Card, Spinner, BackendWakingUp, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
 import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, LayoutDashboard } from "lucide-react"
 import { type Period, PERIOD_TRANSLATION_KEY } from "../model/filter-bar-types.ts"
 import { usePanelData } from "../model/usePanelData.ts"
@@ -56,6 +56,18 @@ function colorForValue(value: number): string {
   return "#38bdf8"
 }
 
+function isColdStartError(error: string | null): boolean {
+  if (!error) return false;
+  const lower = error.toLowerCase();
+  return (
+    lower.includes("502") ||
+    lower.includes("503") ||
+    lower.includes("failed to fetch") ||
+    lower.includes("network error") ||
+    lower.includes("could not reach the server")
+  );
+}
+
 function SidebarItem({ icon: Icon, label, active, onClick }: { icon: React.ComponentType<{ className?: string }>; label: string; active: boolean; onClick: () => void }) {
   return (
     <button
@@ -83,10 +95,11 @@ export function PanelDemoPage() {
     indicatorRepository,
     selectedRegionId,
     t("panel.loadReportError"),
+    retryKey,
   )
 
-  const mentorshipData = useMentorshipData(mentorshipRepository, t("panel.loadReportError"))
-  const employabilityData = useEmployabilityData(employabilityRepository, t("panel.loadReportError"))
+  const mentorshipData = useMentorshipData(mentorshipRepository, t("panel.loadReportError"), retryKey)
+  const employabilityData = useEmployabilityData(employabilityRepository, t("panel.loadReportError"), retryKey)
 
   const [selectedZoneName, setSelectedZoneName] = useState<string | null>(null)
   const [vista, setVista] = useState<Vista>("vulnerabilidad")
@@ -103,6 +116,7 @@ export function PanelDemoPage() {
     }
   }, [highConcentrationOnly])
   const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
+  const [retryKey, setRetryKey] = useState(0)
 
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
     useAskAi(aiAgentRepository, { region: selectedRegionId, language: locale, errorFallback: t("dashboard.error") })
@@ -301,12 +315,22 @@ export function PanelDemoPage() {
   }
 
   if (reportError && regions.length === 0) {
+    if (isColdStartError(reportError)) {
+      return (
+        <BackendWakingUp
+          message={t("panel.backendWakingUp")}
+          subMessage={t("panel.backendWakingUpSub")}
+          retryLabel={t("panel.retry")}
+          onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
+        />
+      );
+    }
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 p-6 text-center">
         <TriangleAlert className="h-8 w-8 text-destructive" />
         <p className="text-sm text-destructive">{reportError}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -554,10 +578,19 @@ export function PanelDemoPage() {
                   <Spinner size="lg" />
                 </div>
               ) : mentorshipData.error && mentorshipData.gaps.length === 0 && mentorshipData.programs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                  <TriangleAlert className="h-8 w-8 text-destructive" />
-                  <p className="text-sm text-destructive">{mentorshipData.error}</p>
-                </div>
+                isColdStartError(mentorshipData.error) ? (
+                  <BackendWakingUp
+                    message={t("panel.backendWakingUp")}
+                    subMessage={t("panel.backendWakingUpSub")}
+                    retryLabel={t("panel.retry")}
+                    onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                    <TriangleAlert className="h-8 w-8 text-destructive" />
+                    <p className="text-sm text-destructive">{mentorshipData.error}</p>
+                  </div>
+                )
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
                   <MentorshipGapsPanel gaps={mentorshipData.gaps} />
@@ -580,10 +613,19 @@ export function PanelDemoPage() {
                   <Spinner size="lg" />
                 </div>
               ) : employabilityData.error && employabilityData.gaps.length === 0 && employabilityData.odMatrix.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                  <TriangleAlert className="h-8 w-8 text-destructive" />
-                  <p className="text-sm text-destructive">{employabilityData.error}</p>
-                </div>
+                isColdStartError(employabilityData.error) ? (
+                  <BackendWakingUp
+                    message={t("panel.backendWakingUp")}
+                    subMessage={t("panel.backendWakingUpSub")}
+                    retryLabel={t("panel.retry")}
+                    onRetry={() => startTransition(() => setRetryKey((k) => k + 1))}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                    <TriangleAlert className="h-8 w-8 text-destructive" />
+                    <p className="text-sm text-destructive">{employabilityData.error}</p>
+                  </div>
+                )
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
                   <EmployabilityGapsPanel gaps={employabilityData.gaps} />

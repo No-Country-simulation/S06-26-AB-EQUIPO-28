@@ -58,14 +58,10 @@ function resolveArray<T>(body: unknown, field?: string): T[] {
   if (body && typeof body === "object") {
     const obj = body as Record<string, unknown>;
     if (field && Array.isArray(obj[field])) return obj[field] as T[];
-    if (Array.isArray(obj.content)) {
-      console.log("[resolveArray] found .content with", obj.content.length, "items");
-      return obj.content as T[];
-    }
+    if (Array.isArray(obj.content)) return obj.content as T[];
     if (Array.isArray(obj.items)) return obj.items as T[];
     if (Array.isArray(obj.regionSummaries)) return obj.regionSummaries as T[];
   }
-  console.warn("[repositories] Unexpected API response shape — no array found", JSON.stringify(body).slice(0, 500));
   return [];
 }
 
@@ -161,32 +157,19 @@ export const aiAgentRepository: AiAgentRepository = {
 export const mobilityDataRepository: MobilityDataRepository = {
   async getAntennas(params) {
     const searchParams = new URLSearchParams();
-    // NOTE: Backend AntennaController only accepts page/size — no cluster filter.
-    // Region filtering is done client-side after fetch.
 
-    console.log("[repo] getAntennas: fetching from /api/v1/telemetry/antennas");
     const items = await fetchAllPages<AntennaItem>(
       "/api/v1/telemetry/antennas",
       searchParams,
-      7,  // 132 antennas ÷ 20 per page ≈ 7 pages
-      20, // antennas rejects size > 20
+      7,
+      20,
     );
-    console.log("[repo] getAntennas: raw items from API:", items.length);
-    if (items.length > 0) {
-      console.log("[repo] getAntennas: sample item:", JSON.stringify(items[0]));
-    }
 
     const allAntennas = toAntennaList(items);
-    console.log("[repo] getAntennas: mapped to domain:", allAntennas.length);
-    if (allAntennas.length > 0) {
-      console.log("[repo] getAntennas: sample domain:", JSON.stringify(allAntennas[0]));
-    }
 
     // Client-side region filter (backend doesn't support cluster param)
     if (params?.regionId) {
-      const filtered = allAntennas.filter((a) => a.regionId === params.regionId);
-      console.log("[repo] getAntennas: filtered by region", params.regionId, "→", filtered.length);
-      return filtered;
+      return allAntennas.filter((a) => a.regionId === params.regionId);
     }
     return allAntennas;
   },

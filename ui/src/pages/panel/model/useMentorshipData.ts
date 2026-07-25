@@ -25,6 +25,7 @@ export interface MentorshipData {
 export function useMentorshipData(
   mentorshipRepository: MentorshipRepository,
   errorFallback: string,
+  retryKey: number = 0,
 ): MentorshipData {
   const [programs, setPrograms] = useState<readonly MentorshipProgram[]>([]);
   const [gaps, setGaps] = useState<readonly MentorshipGap[]>([]);
@@ -74,7 +75,7 @@ export function useMentorshipData(
     return () => {
       cancelled = true;
     };
-  }, [mentorshipRepository, errorFallback]);
+  }, [mentorshipRepository, errorFallback, retryKey]);
 
   return { programs, gaps, clusters, loading, error };
 }

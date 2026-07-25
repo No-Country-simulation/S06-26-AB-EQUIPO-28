@@ -28,6 +28,7 @@ export function usePanelData(
   indicatorRepository: IndicatorRepository,
   selectedRegionId: string | null,
   reportErrorFallback: string,
+  retryKey: number = 0,
 ): PanelData {
   const [report, setReport] = useState<MentalHealthReport | null>(null);
   const [reportLoading, setReportLoading] = useState(true);
@@ -57,7 +58,7 @@ export function usePanelData(
     }
     load();
     return () => { cancelled = true; };
-  }, [mentalHealthRepository]);
+  }, [mentalHealthRepository, retryKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +75,7 @@ export function usePanelData(
     }
     load();
     return () => { cancelled = true; };
-  }, [mentalHealthRepository]);
+  }, [mentalHealthRepository, retryKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +89,7 @@ export function usePanelData(
     }
     load();
     return () => { cancelled = true; };
-  }, [selectedRegionId, indicatorRepository]);
+  }, [selectedRegionId, indicatorRepository, retryKey]);
 
   return {
     report,

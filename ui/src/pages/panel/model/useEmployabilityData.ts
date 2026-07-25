@@ -25,6 +25,7 @@ export interface EmployabilityData {
 export function useEmployabilityData(
   employabilityRepository: EmployabilityRepository,
   errorFallback: string,
+  retryKey: number = 0,
 ): EmployabilityData {
   const [odMatrix, setOdMatrix] = useState<readonly MobilityODPair[]>([]);
   const [travelTimes, setTravelTimes] = useState<readonly TravelTime[]>([]);
@@ -74,7 +75,7 @@ export function useEmployabilityData(
     return () => {
       cancelled = true;
     };
-  }, [employabilityRepository, errorFallback]);
+  }, [employabilityRepository, errorFallback, retryKey]);
 
   return { odMatrix, travelTimes, gaps, loading, error };
 }

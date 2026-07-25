@@ -26,6 +26,7 @@ export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants } from "./Ta
 export { Separator } from "./Separator/index.ts";
 export { ScrollArea, ScrollBar } from "./ScrollArea/index.ts";
 
+export { BackendWakingUp } from "./BackendWakingUp/index.ts";
 // legacy — keep until migrated
 export { Spinner } from "./Spinner/index.ts";
 export { Modal } from "./Modal/index.ts";
