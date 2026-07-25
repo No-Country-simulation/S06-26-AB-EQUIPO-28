@@ -15,7 +15,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://appbit-service-production.up.railway.app",
+        target: "https://s06-26-ab-equipo-28.onrender.com",
         changeOrigin: true,
       },
     },
