@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo, useEffect, startTransition } from "react"
+import { useState, useCallback, useMemo, useEffect, useRef, startTransition } from "react"
 import {
   useLanguage,
   formatLocaleNumber,
@@ -17,7 +17,7 @@ import { PanelHeader, KpiCards, DetallePanel, ZonasPanel, Comparativo, AiQueryPa
 import { InteractiveMapWidget } from "@/widgets/interactive-map"
 import type { RegionPoint } from "@/widgets/interactive-map"
 import { Card, Spinner, BackendWakingUp, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui"
-import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, LayoutDashboard } from "lucide-react"
+import { MapIcon, BarChart3, Layers, TriangleAlert, Sparkles, Bell, FileDown, Users, Briefcase, LayoutDashboard, Check, Search, X } from "lucide-react"
 import { type Period, PERIOD_TRANSLATION_KEY } from "../model/filter-bar-types.ts"
 import { usePanelData } from "../model/usePanelData.ts"
 import { useMentorshipData } from "../model/useMentorshipData.ts"
@@ -117,8 +117,27 @@ export function PanelDemoPage() {
       setShowAntennas(false)
     }
   }, [highConcentrationOnly])
-  const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
 
+  // Initialize comparative selection with all regions when report loads
+  useEffect(() => {
+    if (report?.regionSummaries) {
+      const allNames = report.regionSummaries.map((rs) => rs.regionName)
+      setSelectedComparativeRegions((prev) => {
+        if (prev.length === 0) return allNames
+        return prev
+      })
+    }
+  }, [report?.regionSummaries])
+  const [alertHistoryOpen, setAlertHistoryOpen] = useState(false)
+  const [selectedComparativeRegions, setSelectedComparativeRegions] = useState<string[]>([])
+  const [compareQuery, setCompareQuery] = useState("")
+  const [compareSearch, setCompareSearch] = useState("")
+  const [compareLoadingState, setCompareLoadingState] = useState(false)
+  const [compareErrorState, setCompareErrorState] = useState<string | null>(null)
+  const [compareResponseState, setCompareResponseState] = useState<ReturnType<typeof useAskAi>["response"] | null>(null)
+  const [compareLastQuestionState, setCompareLastQuestionState] = useState("")
+  const [loadingMessage, setLoadingMessage] = useState("")
+  const loadingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const { query, setQuery, submit, response, lastQuestion, isLoading: aiLoading, error: aiError, clearResponse } =
     useAskAi(aiAgentRepository, { region: selectedRegionId, language: locale, errorFallback: t("dashboard.error") })
 
@@ -255,7 +274,7 @@ export function PanelDemoPage() {
     max: 100,
   }))
 
-  const comparativoRegiones = (report?.regionSummaries ?? []).map((rs) => ({
+  const allComparativoRegiones = (report?.regionSummaries ?? []).map((rs) => ({
     id: rs.regionName,
     nombre: rs.regionName,
     label: rs.regionName,
@@ -267,16 +286,119 @@ export function PanelDemoPage() {
     ],
   }))
 
+  const comparativoRegiones = allComparativoRegiones.filter((r) => selectedComparativeRegions.includes(r.id))
+
   const vulnerabilityScoreLabel = t("panel.metric.vulnerabilityScore")
   const vulnerablePctLabel = t("panel.metric.vulnerablePct")
   const priorityLabel = t("panel.metric.priority")
 
-  const chartData = (report?.regionSummaries ?? []).map((rs) => ({
+  const allChartData = (report?.regionSummaries ?? []).map((rs) => ({
     indicador: rs.regionName,
     [vulnerabilityScoreLabel]: rs.vulnerabilityScore,
     [vulnerablePctLabel]: rs.vulnerablePercentage,
     [priorityLabel]: rs.isPriorityForIntervention ? 100 : 0,
   }))
+
+  const chartData = allChartData.filter((d) => selectedComparativeRegions.includes(d.indicador as string))
+
+  const toggleComparativeRegion = useCallback((regionName: string) => {
+    setSelectedComparativeRegions((prev) =>
+      prev.includes(regionName) ? prev.filter((r) => r !== regionName) : [...prev, regionName]
+    )
+  }, [])
+
+  const allRegionsSelected = selectedComparativeRegions.length === allComparativoRegiones.length && allComparativoRegiones.length > 0
+
+  const handleSelectAllRegions = useCallback(() => {
+    if (allRegionsSelected) {
+      setSelectedComparativeRegions([])
+    } else {
+      setSelectedComparativeRegions(allComparativoRegiones.map((r) => r.id))
+    }
+  }, [allRegionsSelected, allComparativoRegiones])
+
+  const filteredComparativeRegions = useMemo(() => {
+    if (!compareSearch.trim()) return allComparativoRegiones
+    const term = compareSearch.toLowerCase()
+    return allComparativoRegiones.filter((r) => r.label.toLowerCase().includes(term))
+  }, [allComparativoRegiones, compareSearch])
+
+  // Cycling loading messages while AI compares
+  useEffect(() => {
+    if (!compareLoadingState) {
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+      return
+    }
+    const count = comparativoRegiones.length
+    const messages = [
+      `${t("panel.comparative.loading1", { count })}`,
+      t("panel.comparative.loading2"),
+      t("panel.comparative.loading3"),
+      t("panel.comparative.loading4"),
+      t("panel.comparative.loading5"),
+      t("panel.comparative.loading6"),
+    ]
+    let idx = 0
+    setLoadingMessage(messages[0])
+    loadingTimerRef.current = setInterval(() => {
+      idx = (idx + 1) % messages.length
+      setLoadingMessage(messages[idx])
+    }, 4000)
+    return () => {
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+    }
+  }, [compareLoadingState, comparativoRegiones.length, t])
+
+  const handleAiCompare = useCallback(async () => {
+    if (comparativoRegiones.length < 2) return
+    const regionNames = comparativoRegiones.map((r) => r.label).join(", ")
+    const prompt = t("panel.comparative.aiPrompt", { regions: regionNames })
+
+    setCompareQuery(prompt)
+    setCompareLoadingState(true)
+    setCompareErrorState(null)
+    setCompareLastQuestionState(prompt)
+
+    try {
+      const result = await aiAgentRepository.askQuery({
+        question: prompt,
+        language: locale,
+      })
+      setCompareResponseState(result)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t("dashboard.error")
+      setCompareErrorState(message)
+    } finally {
+      setCompareLoadingState(false)
+    }
+  }, [comparativoRegiones, t, aiAgentRepository, locale, setCompareQuery])
+
+  const clearCompareResponse = useCallback(() => {
+    setCompareResponseState(null)
+    setCompareErrorState(null)
+    setCompareLastQuestionState("")
+    setCompareQuery("")
+  }, [setCompareQuery])
+
+  const comparePanelResponse = compareResponseState
+    ? {
+        respuesta_ia: compareResponseState.summary,
+        titulo: t("panel.aiAnalysis.title"),
+        metrica: t("panel.comparative.aiCompare"),
+        datos: compareResponseState.data.map((d) => ({
+          region: d.region,
+          valor: d.value,
+          fuente: d.source,
+        })),
+        fuentes: [...compareResponseState.sources],
+      }
+    : null
 
   const aiPanelResponse = response
     ? {
@@ -296,7 +418,7 @@ export function PanelDemoPage() {
 
   const regionOptions = regions.map((r) => ({ id: r.id, label: r.name }))
 
-  const showComparativo = comparativoRegiones.length >= 2
+  const showComparativo = allComparativoRegiones.length >= 2
 
   const sidebarItems: { key: Section; icon: React.ComponentType<{ className?: string }>; label: string; hidden?: boolean }[] = [
     { key: "dashboard", icon: LayoutDashboard, label: t("panel.dashboard") },
@@ -560,12 +682,190 @@ export function PanelDemoPage() {
           )}
 
           {section === "comparativo" && showComparativo && (
-            <div className="mt-4">
-              <Comparativo
-                regiones={comparativoRegiones}
-                chartData={chartData}
-                description={t("panel.comparative.description")}
-              />
+            <div className="mt-4 flex flex-col gap-4">
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">{t("panel.comparative.title")}</h1>
+                <p className="text-xs text-muted-foreground">{t("panel.comparative.description")}</p>
+              </div>
+
+              {/* Search + Select All + Region chips */}
+              <Card className="p-4">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="relative flex-1 min-w-[200px] max-w-xs">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder={t("panel.comparative.searchPlaceholder")}
+                      value={compareSearch}
+                      onChange={(e) => setCompareSearch(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-8 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
+                    />
+                    {compareSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setCompareSearch("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSelectAllRegions}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    {allRegionsSelected ? t("panel.comparative.clearAll") : t("panel.comparative.selectAll")}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filteredComparativeRegions.map((r) => {
+                    const selected = selectedComparativeRegions.includes(r.id)
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => toggleComparativeRegion(r.id)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                          selected
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-card text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {selected && <Check className="h-3 w-3" />}
+                        {r.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length < 2 && (
+                  <p className="mt-2 text-[10px] text-muted-foreground">{t("panel.comparative.minRegions")}</p>
+                )}
+              </Card>
+
+              {/* Action bar — inspired by equipo 69 pattern */}
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold text-foreground">
+                    {selectedComparativeRegions.length > 0
+                      ? `${selectedComparativeRegions.length} ${selectedComparativeRegions.length === 1 ? t("panel.comparative.regionSelected") : t("panel.comparative.regionsSelected")}`
+                      : t("panel.comparative.noneSelected")}
+                  </span>
+                  {selectedComparativeRegions.length > 0 && selectedComparativeRegions.length <= 3 && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground text-xs">
+                        {selectedComparativeRegions.map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")}
+                      </span>
+                    </>
+                  )}
+                  {selectedComparativeRegions.length > 3 && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground text-xs">
+                        {selectedComparativeRegions.slice(0, 3).map((id) => allComparativoRegiones.find((r) => r.id === id)?.label).filter(Boolean).join(" · ")} · +{selectedComparativeRegions.length - 3}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAiCompare}
+                  disabled={selectedComparativeRegions.length < 2 || compareLoadingState}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {compareLoadingState ? (
+                    <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+                      <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {compareLoadingState ? loadingMessage : t("panel.comparative.aiCompare")}
+                </button>
+              </div>
+
+              {comparativoRegiones.length >= 2 && (
+                <Comparativo
+                  regiones={comparativoRegiones}
+                  chartData={chartData}
+                />
+              )}
+
+              {comparativoRegiones.length < 2 && selectedComparativeRegions.length >= 2 && (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <p className="text-sm text-muted-foreground">{t("panel.comparative.minRegions")}</p>
+                </div>
+              )}
+
+              {/* AI Response */}
+              {compareErrorState && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                  <p className="text-sm text-destructive">{compareErrorState}</p>
+                </div>
+              )}
+
+              {comparePanelResponse && (
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold">{t("panel.comparative.aiCompare")}</h3>
+                      <p className="text-[10px] text-muted-foreground">{t("panel.comparative.description")}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearCompareResponse}
+                      className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {comparePanelResponse.respuesta_ia && (
+                    <div className="mb-4 rounded-lg bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
+                      {comparePanelResponse.respuesta_ia}
+                    </div>
+                  )}
+
+                  {comparePanelResponse.datos && comparePanelResponse.datos.length > 0 && (
+                    <div className="overflow-hidden rounded-lg border border-border">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.region")}</th>
+                            <th className="px-3 py-2 text-right font-medium">{t("panel.queryTable.value")}</th>
+                            <th className="px-3 py-2 text-left font-medium">{t("panel.queryTable.source")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparePanelResponse.datos.map((d, i) => (
+                            <tr key={d.region} className={i % 2 ? "bg-background/40" : ""}>
+                              <td className="px-3 py-2">{d.region}</td>
+                              <td className="px-3 py-2 text-right font-mono">{typeof d.valor === "number" ? d.valor.toLocaleString() : d.valor}</td>
+                              <td className="px-3 py-2 text-xs text-muted-foreground">{d.fuente}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {comparePanelResponse.fuentes && comparePanelResponse.fuentes.length > 0 && (
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">{t("panel.querySources")}</span>
+                      {comparePanelResponse.fuentes.map((f) => (
+                        <span key={f} className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

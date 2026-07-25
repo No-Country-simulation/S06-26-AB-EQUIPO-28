@@ -150,7 +150,7 @@ export async function generatePdfReport(data: ReportData): Promise<void> {
   docWithAutoTable.setFontSize(18);
   docWithAutoTable.setFont("helvetica", "bold");
   docWithAutoTable.setTextColor(29, 78, 216);
-  docWithAutoTable.text("App BiT", margin, y);
+  docWithAutoTable.text("Panel BiT", margin, y);
   y += 7;
 
   docWithAutoTable.setFontSize(14);
