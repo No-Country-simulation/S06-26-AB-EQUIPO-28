@@ -187,7 +187,6 @@ function buildRegionFeatures(
 }
 
 export function MapLibreMap({ antennas, pins, regions = [], selectedRegionId = null, onRegionSelect, viewport, showAntennas = true, popupStrings }: MapLibreMapProps) {
-  console.log("[MapLibreMap] render — antennas:", antennas.length, "pins:", pins.length, "showAntennas:", showAntennas);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapShim | null>(null);
   // Keep refs to the LATEST data so the async "load" handler can read them.
@@ -237,7 +236,6 @@ export function MapLibreMap({ antennas, pins, regions = [], selectedRegionId = n
 
         map.on("load", () => {
           if (cleanupCalled || !map) return;
-          console.log("[MapLibreMap] map LOAD — antennasRef:", antennasRef.current.length, "pinsRef:", pinsRef.current.length);
 
           /* ── Antenna markers ──────────────────────────────────── */
           // Use refs so we get the LATEST data even if the load handler
@@ -517,19 +515,16 @@ export function MapLibreMap({ antennas, pins, regions = [], selectedRegionId = n
   // Uses the existing map reference — does NOT recreate the map.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) { console.log("[MapLibreMap] Phase2: map not ready yet"); return; }
+    if (!map) return;
 
     try {
       const antennaSource = map.getSource("antennas");
       if (antennaSource) {
         const features = buildAntennaFeatures(antennas);
-        console.log("[MapLibreMap] Phase2: updating antennas source with", antennas.length, "items,", features.features.length, "features");
         antennaSource.setData(features);
-      } else {
-        console.log("[MapLibreMap] Phase2: antenna source not found (map may not have loaded yet)");
       }
-    } catch (e) {
-      console.warn("[MapLibreMap] Phase2: antenna update error:", e);
+    } catch {
+      // antenna source not ready yet
     }
 
     try {
