@@ -41,7 +41,7 @@ services:
       - "-c"
       - "work_mem=4MB"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d vineyard_docker_db || exit 1" ]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d app_bit_docker_db || exit 1" ]
       interval: 20s
       timeout: 10s
       retries: 5
@@ -53,6 +53,7 @@ services:
           memory: 150M
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./dataset-visent:/dataset
 
 volumes:
   postgres_data:
