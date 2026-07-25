@@ -157,7 +157,7 @@ function Hero({ t }: { t: (key: string) => string }) {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
         style={{ backgroundImage: "url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-background" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/50 via-black/30 to-background" />
 
 
       <div className="relative z-10 w-full max-w-6xl px-6 py-20 mx-auto">
@@ -172,7 +172,7 @@ function Hero({ t }: { t: (key: string) => string }) {
             dangerouslySetInnerHTML={{ __html: t("landing.hero.title") }}
           />
 
-          <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="mt-5 text-lg sm:text-xl text-white max-w-2xl leading-relaxed">
             {t("landing.hero.description")}
           </p>
 
